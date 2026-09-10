@@ -1,0 +1,31 @@
+---
+description: Casa Maiz assessment constraints. Overrides Vercel RN defaults. React Native CLI, CMS-driven UI, no Expo.
+alwaysApply: true
+---
+
+# Casa Maiz Assessment
+
+React Native CLI + TypeScript app that consumes the published Casa Maiz Payload CMS API. Do not modify the CMS.
+
+## Hard constraints
+
+- Never add Expo, expo-image, expo-router, or NativeWind.
+- Style with `StyleSheet` and theme tokens. Platform-specific iOS vs Android UI is welcome.
+- Do not hardcode CMS copy, navigation labels, promotions, flags, or feature availability.
+- Build content query context in one CMS client: `platform` from `Platform.OS`, `market=MX`, `audience=guest`, `appVersion` semver from the binary. Never in screens.
+- Verify `contractVersion` `1.1`. Fail safely on mismatch, malformed JSON, or unavailable API.
+- Render pages from `layout` via a `blockType` registry. Unknown or incomplete blocks must not crash.
+- Persist the last successful content response. Do not use cached targeted content past `nextChangeAt`.
+- Never POST to the shared `/api/form-submissions` endpoint. Mock form submission if needed.
+- Do not log full CMS payloads.
+
+## Prefer over Vercel RN skills
+
+- Lists: `FlatList` unless virtualization is clearly needed. Do not add FlashList or LegendList by default.
+- Navigation: `@react-navigation/native-stack` and `@react-navigation/bottom-tabs` (already installed).
+- Images: React Native `Image`; resolve both absolute CDN URLs and relative Payload paths.
+- Skip Reanimated unless a concrete interaction requires it.
+
+## Accessibility
+
+Expose roles, labels, and states. Keep 44pt touch targets. Support Dynamic Type, dark mode, Reduce Motion, and user-safe error messages.
