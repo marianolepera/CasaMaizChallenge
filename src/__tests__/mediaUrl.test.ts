@@ -1,5 +1,5 @@
 import {DEFAULT_API_BASE_URL} from '../config/api';
-import {resolveMediaUrl} from '../cms/media';
+import {resolveCmsImage, resolveMediaUrl} from '../cms/media';
 
 describe('resolveMediaUrl', () => {
   it('keeps absolute CDN URLs unchanged', () => {
@@ -41,5 +41,30 @@ describe('resolveMediaUrl', () => {
     expect(resolveMediaUrl({}, DEFAULT_API_BASE_URL)).toBeUndefined();
     expect(resolveMediaUrl({url: ''}, DEFAULT_API_BASE_URL)).toBeUndefined();
     expect(resolveMediaUrl({url: 123}, DEFAULT_API_BASE_URL)).toBeUndefined();
+  });
+
+  it('picks a mobile-sized derivative and keeps alt text', () => {
+    expect(
+      resolveCmsImage(
+        {
+          alt: 'Hero',
+          url: 'https://cdn.example/hero.webp',
+          width: 3200,
+          height: 1800,
+          sizes: {
+            medium: {
+              url: 'https://cdn.example/hero-900.webp',
+              width: 900,
+              height: 506,
+            },
+          },
+        },
+        DEFAULT_API_BASE_URL,
+      ),
+    ).toEqual({
+      uri: 'https://cdn.example/hero-900.webp',
+      alt: 'Hero',
+      aspectRatio: 900 / 506,
+    });
   });
 });
