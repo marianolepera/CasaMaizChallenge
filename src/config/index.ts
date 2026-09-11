@@ -9,6 +9,7 @@ export {
   assertAppVersion,
   contentQueryFromRuntime,
   createContentContext,
+  getRuntimeContentQuery,
   resolvePlatform,
   toContentQuery,
 } from './contentContext';

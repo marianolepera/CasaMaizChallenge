@@ -4,13 +4,15 @@ import {PageLayout} from '../blocks/PageLayout';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Text} from '../components/atoms/Text';
 import {useCmsPage} from '../hooks/useCmsPage';
 import {useTheme} from '../theme';
 
 export function HomeScreen() {
   const {colors, spacing} = useTheme();
-  const {page, error, loading, refreshing, reload, refresh} = useCmsPage('home');
+  const {page, error, loading, refreshing, source, reload, refresh} =
+    useCmsPage('home');
 
   const refreshControl = (
     <RefreshControl
@@ -58,6 +60,7 @@ export function HomeScreen() {
     <SafeAreaView
       style={[styles.safe, {backgroundColor: colors.background}]}
       testID="home-screen">
+      {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       <ScrollView
         refreshControl={refreshControl}
         contentContainerStyle={{paddingBottom: spacing.xl}}>

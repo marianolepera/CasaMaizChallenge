@@ -1,3 +1,5 @@
+import {Platform} from 'react-native';
+
 export const DEFAULT_MARKET = 'MX' as const;
 export const DEFAULT_AUDIENCE = 'guest' as const;
 export const DEFAULT_APP_VERSION = '1.0.0';
@@ -66,4 +68,11 @@ export function contentQueryFromRuntime(input: {
   appVersion: string;
 }): ContentQuery {
   return toContentQuery(createContentContext(input));
+}
+
+export function getRuntimeContentQuery(): ContentQuery {
+  return contentQueryFromRuntime({
+    platform: Platform.OS,
+    appVersion: DEFAULT_APP_VERSION,
+  });
 }

@@ -6,6 +6,11 @@ import {TEXT_BLOCK_HEADING_TEST_ID} from '../blocks/textBlock';
 import type {CmsClient} from '../cms/contentClient';
 import type {ContentEnvelope} from '../cms/envelope';
 import {CmsClientProvider} from '../cms/CmsClientProvider';
+import {OFFLINE_BANNER_TEST_ID} from '../components/molecules/OfflineBanner';
+import {createContentRepository} from '../repository/contentRepository';
+import {ContentRepositoryProvider} from '../repository/ContentRepositoryProvider';
+import type {ContentRepository} from '../repository/contentRepository';
+import {createMemoryStore} from '../repository/memoryStorage';
 import {HomeScreen} from '../screens/HomeScreen';
 
 const insets = {
@@ -23,18 +28,42 @@ function mockClient(overrides: Partial<CmsClient>): CmsClient {
   };
 }
 
-function renderHome(client: CmsClient) {
+function pageEnvelope(heading: string): ContentEnvelope {
+  return {
+    contractVersion: '1.1',
+    data: {
+      title: 'Casa Maíz',
+      layout: [{blockType: 'textBlock', heading}],
+    },
+    preview: false,
+    nextChangeAt: '2026-10-25T04:15:00.000Z',
+  };
+}
+
+function renderHome(
+  client: CmsClient,
+  repository: ContentRepository = createContentRepository(createMemoryStore()),
+) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
       <SafeAreaProvider initialMetrics={insets}>
         <CmsClientProvider client={client}>
-          <HomeScreen />
+          <ContentRepositoryProvider repository={repository}>
+            <HomeScreen />
+          </ContentRepositoryProvider>
         </CmsClientProvider>
       </SafeAreaProvider>,
     );
   });
   return tree!;
+}
+
+async function flush() {
+  await ReactTestRenderer.act(async () => {
+    await Promise.resolve();
+    await Promise.resolve();
+  });
 }
 
 describe('HomeScreen', () => {
@@ -59,40 +88,32 @@ describe('HomeScreen', () => {
     const tree = renderHome(mockClient({getPage}));
 
     await ReactTestRenderer.act(async () => {
-      resolvePage({
-        contractVersion: '1.1',
-        data: {
-          title: 'Casa Maíz',
-          layout: [{blockType: 'textBlock', heading: 'Hola CMS'}],
-        },
-      });
+      resolvePage(pageEnvelope('Hola CMS'));
+      await Promise.resolve();
     });
 
     expect(
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
     ).toBe('Hola CMS');
+    expect(() => tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID})).toThrow();
   });
 
-  it('shows a retryable error and recovers', async () => {
+  it('shows a retryable error and recovers when there is no cache', async () => {
     const getPage = jest
       .fn()
       .mockRejectedValueOnce(networkError())
-      .mockResolvedValueOnce({
-        contractVersion: '1.1',
-        data: {
-          layout: [{blockType: 'textBlock', heading: 'Después del retry'}],
-        },
-      }) as CmsClient['getPage'];
+      .mockResolvedValueOnce(
+        pageEnvelope('Después del retry'),
+      ) as CmsClient['getPage'];
     const tree = renderHome(mockClient({getPage}));
 
-    await ReactTestRenderer.act(async () => {
-      await Promise.resolve();
-    });
+    await flush();
 
     expect(tree.root.findByProps({testID: 'cms-error-state'})).toBeTruthy();
 
     await ReactTestRenderer.act(async () => {
       tree.root.findByProps({accessibilityLabel: 'Reintentar'}).props.onPress();
+      await Promise.resolve();
       await Promise.resolve();
     });
 

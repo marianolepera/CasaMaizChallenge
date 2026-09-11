@@ -1,9 +1,11 @@
+import {Platform} from 'react-native';
 import {
   DEFAULT_APP_VERSION,
   DEFAULT_AUDIENCE,
   DEFAULT_MARKET,
   contentQueryFromRuntime,
   createContentContext,
+  getRuntimeContentQuery,
 } from '../config/contentContext';
 
 describe('content query context', () => {
@@ -48,5 +50,14 @@ describe('content query context', () => {
     expect(() =>
       createContentContext({platform: 'web', appVersion: '1.0.0'}),
     ).toThrow(/Unsupported content platform/);
+  });
+
+  it('builds query context from the binary platform and app version', () => {
+    expect(getRuntimeContentQuery()).toEqual({
+      platform: Platform.OS,
+      market: DEFAULT_MARKET,
+      audience: DEFAULT_AUDIENCE,
+      appVersion: DEFAULT_APP_VERSION,
+    });
   });
 });

@@ -2,6 +2,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {StatusBar, useColorScheme} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {CmsClientProvider} from './src/cms/CmsClientProvider';
+import {ContentRepositoryProvider} from './src/repository/ContentRepositoryProvider';
 import {HomeScreen} from './src/screens/HomeScreen';
 
 function App() {
@@ -10,10 +11,12 @@ function App() {
   return (
     <SafeAreaProvider>
       <CmsClientProvider>
-        <NavigationContainer>
-          <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-          <HomeScreen />
-        </NavigationContainer>
+        <ContentRepositoryProvider>
+          <NavigationContainer>
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+            <HomeScreen />
+          </NavigationContainer>
+        </ContentRepositoryProvider>
       </CmsClientProvider>
     </SafeAreaProvider>
   );
