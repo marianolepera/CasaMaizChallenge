@@ -1,7 +1,12 @@
 import React from 'react';
+import {Image} from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import {PageLayout} from '../blocks/PageLayout';
 import {UNKNOWN_BLOCK_TEST_ID} from '../blocks/UnknownBlock';
+import {
+  IMAGE_BLOCK_CAPTION_TEST_ID,
+  IMAGE_BLOCK_TEST_ID,
+} from '../blocks/imageBlock';
 import {
   TEXT_BLOCK_HEADING_TEST_ID,
   TEXT_BLOCK_TEST_ID,
@@ -70,5 +75,47 @@ describe('CMS page layout renderer', () => {
     expect(
       tree.root.findByProps({testID: UNKNOWN_BLOCK_TEST_ID}),
     ).toBeTruthy();
+  });
+
+  it('renders imageBlock caption and prefers the mobile image', () => {
+    const tree = renderLayout([
+      {
+        blockType: 'imageBlock',
+        caption: 'Este es un ejemplo',
+        fullBleed: false,
+        image: {
+          url: 'https://cdn.example/desktop.webp',
+          alt: 'desktop',
+        },
+        mobileImage: {
+          url: 'https://cdn.example/mobile.webp',
+          alt: 'mobile',
+        },
+      },
+    ]);
+
+    expect(tree.root.findByProps({testID: IMAGE_BLOCK_TEST_ID})).toBeTruthy();
+    expect(
+      tree.root.findByProps({testID: IMAGE_BLOCK_CAPTION_TEST_ID}).props
+        .children,
+    ).toBe('Este es un ejemplo');
+    expect(tree.root.findByType(Image).props.source.uri).toBe(
+      'https://cdn.example/mobile.webp',
+    );
+  });
+
+  it('does not crash when imageBlock has no media or caption', () => {
+    const tree = renderLayout([
+      {blockType: 'imageBlock'},
+      {blockType: 'textBlock', heading: 'Sigue el menú'},
+    ]);
+
+    expect(() =>
+      tree.root.findByProps({testID: IMAGE_BLOCK_TEST_ID}),
+    ).toThrow();
+    expect(
+      tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props
+        .children,
+    ).toBe('Sigue el menú');
   });
 });

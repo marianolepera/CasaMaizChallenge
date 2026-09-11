@@ -2,8 +2,9 @@ import {NavigationContainer} from '@react-navigation/native';
 import {StatusBar, useColorScheme} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {CmsClientProvider} from './src/cms/CmsClientProvider';
+import {RootNavigator} from './src/navigation/RootNavigator';
+import {navigationRef} from './src/navigation/navigationRef';
 import {ContentRepositoryProvider} from './src/repository/ContentRepositoryProvider';
-import {HomeScreen} from './src/screens/HomeScreen';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
@@ -12,9 +13,9 @@ function App() {
     <SafeAreaProvider>
       <CmsClientProvider>
         <ContentRepositoryProvider>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-            <HomeScreen />
+            <RootNavigator />
           </NavigationContainer>
         </ContentRepositoryProvider>
       </CmsClientProvider>

@@ -1,0 +1,110 @@
+import type {ComponentType} from 'react';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {ErrorState} from '../components/molecules/ErrorState';
+import {LoadingState} from '../components/molecules/LoadingState';
+import {useCmsBootstrap} from '../hooks/useCmsBootstrap';
+import {HomeScreen} from '../screens/HomeScreen';
+import {MenuScreen} from '../screens/MenuScreen';
+import {PrivacyScreen} from '../screens/PrivacyScreen';
+import {useTheme} from '../theme';
+import {resolveTabIconKey, TabBarIcon} from './tabIcons';
+import {
+  privacyTabLabel,
+  toTabRoutes,
+  type MainTabParamList,
+  type RootStackParamList,
+  type TabRoute,
+  type TabRouteName,
+} from './routes';
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<MainTabParamList>();
+
+const TAB_SCREENS: Record<TabRouteName, ComponentType> = {
+  Home: HomeScreen,
+  Menu: MenuScreen,
+};
+
+export function RootNavigator() {
+  const {colors} = useTheme();
+  const {bootstrap, error, loading, reload} = useCmsBootstrap();
+
+  if (loading && !bootstrap) {
+    return <LoadingState />;
+  }
+
+  if (error && !bootstrap) {
+    return <ErrorState message={error.userMessage} onRetry={reload} />;
+  }
+
+  const tabRoutes = bootstrap ? toTabRoutes(bootstrap.navigation) : [];
+  if (tabRoutes.length === 0) {
+    return <HomeScreen />;
+  }
+
+  const privacyLabel = bootstrap
+    ? privacyTabLabel(bootstrap.navigation)
+    : undefined;
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTintColor: colors.accent,
+        headerStyle: {backgroundColor: colors.surface},
+        headerTitleStyle: {color: colors.text},
+        contentStyle: {backgroundColor: colors.background},
+      }}>
+      <Stack.Screen name="Tabs" options={{headerShown: false}}>
+        {() => <MainTabs routes={tabRoutes} />}
+      </Stack.Screen>
+      <Stack.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={{title: privacyLabel ?? ''}}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function MainTabs({routes}: {routes: TabRoute[]}) {
+  const {colors, minTouchTarget} = useTheme();
+
+  return (
+    <Tab.Navigator
+      initialRouteName={routes[0]?.name}
+      screenOptions={{
+        headerShown: false,
+        tabBarActiveTintColor: colors.accent,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+          minHeight: minTouchTarget,
+        },
+        tabBarItemStyle: {minHeight: minTouchTarget},
+      }}>
+      {routes.map(route => (
+        <Tab.Screen
+          key={route.name}
+          name={route.name}
+          component={TAB_SCREENS[route.name]}
+          options={{
+            title: route.label,
+            tabBarLabel: route.label,
+            tabBarAccessibilityLabel: route.label,
+            tabBarButtonTestID: `cms-tab-${route.name}`,
+            tabBarIcon: ({color, size}) => (
+              <TabBarIcon
+                iconKey={resolveTabIconKey(route.icon, route.name)}
+                color={color}
+                size={size}
+                testID={`cms-tab-icon-${route.name}`}
+              />
+            ),
+          }}
+        />
+      ))}
+    </Tab.Navigator>
+  );
+}

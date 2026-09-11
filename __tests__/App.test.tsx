@@ -11,13 +11,27 @@ const homeEnvelope = {
   data: {slug: 'home', title: 'Casa Maíz', layout: []},
 };
 
+const bootstrapEnvelope = {
+  contractVersion: '1.1',
+  data: {
+    navigation: {
+      items: [
+        {label: 'Inicio', destination: {path: '/'}},
+        {label: 'Menú', destination: {path: '/menu'}},
+      ],
+    },
+  },
+};
+
 beforeEach(() => {
-  globalThis.fetch = jest.fn().mockResolvedValue(
-    new Response(JSON.stringify(homeEnvelope), {
+  globalThis.fetch = jest.fn(async input => {
+    const url = String(input);
+    const body = url.includes('/bootstrap') ? bootstrapEnvelope : homeEnvelope;
+    return new Response(JSON.stringify(body), {
       status: 200,
       headers: {'Content-Type': 'application/json'},
-    }),
-  ) as typeof fetch;
+    });
+  }) as typeof fetch;
 });
 
 test('renders correctly', async () => {

@@ -8,4 +8,9 @@ export {PromoRail} from './promoRail';
 export {RestaurantCTA} from './restaurantCTA';
 export {RestaurantHero} from './restaurantHero';
 export {TextBlock, TEXT_BLOCK_HEADING_TEST_ID, TEXT_BLOCK_TEST_ID} from './textBlock';
+export {
+  ImageBlock,
+  IMAGE_BLOCK_CAPTION_TEST_ID,
+  IMAGE_BLOCK_TEST_ID,
+} from './imageBlock';
 export type {BlockComponent, BlockProps} from './types';

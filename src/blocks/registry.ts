@@ -1,5 +1,6 @@
 import {CardGrid} from './cardGrid';
 import {Carousel} from './carousel';
+import {ImageBlock} from './imageBlock';
 import {PromoRail} from './promoRail';
 import {RestaurantCTA} from './restaurantCTA';
 import {RestaurantHero} from './restaurantHero';
@@ -14,6 +15,7 @@ export const blockRegistry: Record<string, BlockComponent> = {
   promoRail: PromoRail,
   textBlock: TextBlock,
   restaurantCTA: RestaurantCTA,
+  imageBlock: ImageBlock,
 };
 
 export function getBlockComponent(blockType: string): BlockComponent {

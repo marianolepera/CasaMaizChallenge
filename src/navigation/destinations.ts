@@ -1,5 +1,6 @@
 import {Alert, Linking} from 'react-native';
 import {readObject, readString} from '../cms/fields';
+import {navigateToInternalPath} from './navigationRef';
 
 export const KNOWN_INTERNAL_PATHS = [
   '/',
@@ -8,10 +9,34 @@ export const KNOWN_INTERNAL_PATHS = [
   '/legal/privacy_policy',
 ] as const;
 
+export type KnownInternalPath = (typeof KNOWN_INTERNAL_PATHS)[number];
+
 export type ResolvedDestination =
-  | {kind: 'internal'; path: (typeof KNOWN_INTERNAL_PATHS)[number]}
+  | {kind: 'internal'; path: KnownInternalPath}
   | {kind: 'external'; url: string}
   | {kind: 'unsupported'; reason: string};
+
+export type DestinationActions = {
+  openExternal: (url: string) => void;
+  openInternal: (path: '/' | '/menu' | '/legal/privacy_policy') => void;
+  notifyReservationsUnavailable: () => void;
+  notifyUnsupported: () => void;
+};
+
+export const defaultDestinationActions: DestinationActions = {
+  openExternal(url) {
+    Linking.openURL(url).catch(() => undefined);
+  },
+  openInternal(path) {
+    navigateToInternalPath(path);
+  },
+  notifyReservationsUnavailable() {
+    Alert.alert('Reservas', 'Las reservas estarán disponibles pronto.');
+  },
+  notifyUnsupported() {
+    Alert.alert('No disponible', 'Esta sección no está disponible.');
+  },
+};
 
 export function extractDestinationPath(input: unknown): string | undefined {
   if (typeof input === 'string') {
@@ -53,20 +78,24 @@ export function resolveDestination(input: unknown): ResolvedDestination | undefi
 
 export function handleResolvedDestination(
   destination: ResolvedDestination,
+  actions: DestinationActions = defaultDestinationActions,
 ): void {
   if (destination.kind === 'external') {
-    Linking.openURL(destination.url).catch(() => undefined);
+    actions.openExternal(destination.url);
     return;
   }
 
-  if (destination.kind === 'internal' && destination.path === '/reservas') {
-    Alert.alert('Reservas', 'Las reservas estarán disponibles pronto.');
+  if (destination.kind === 'internal') {
+    if (destination.path === '/reservas') {
+      actions.notifyReservationsUnavailable();
+      return;
+    }
+
+    actions.openInternal(destination.path);
     return;
   }
 
-  if (destination.kind === 'unsupported') {
-    Alert.alert('No disponible', 'Esta sección no está disponible.');
-  }
+  actions.notifyUnsupported();
 }
 
 function resolveExternalUrl(path: string): ResolvedDestination {
