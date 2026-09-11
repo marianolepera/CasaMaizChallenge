@@ -74,6 +74,7 @@ describe('HomeScreen', () => {
     const tree = renderHome(mockClient({getPage}));
 
     expect(tree.root.findByProps({testID: 'cms-loading-state'})).toBeTruthy();
+    expect(tree.root.findByProps({testID: 'cms-appearance-control'})).toBeTruthy();
     expect(getPage).toHaveBeenCalledWith('home', expect.any(AbortSignal));
   });
 

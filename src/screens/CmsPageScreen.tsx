@@ -1,3 +1,4 @@
+import type {ReactNode} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {PageLayout} from '../blocks/PageLayout';
@@ -13,9 +14,10 @@ import {useTheme} from '../theme';
 export type CmsPageScreenProps = {
   slug: PageSlug;
   testID: string;
+  toolbar?: ReactNode;
 };
 
-export function CmsPageScreen({slug, testID}: CmsPageScreenProps) {
+export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
   const {colors, spacing} = useTheme();
   const {page, error, loading, refreshing, source, reload, refresh} =
     useCmsPage(slug);
@@ -30,42 +32,34 @@ export function CmsPageScreen({slug, testID}: CmsPageScreenProps) {
 
   if (loading && !page) {
     return (
-      <SafeAreaView
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID={testID}>
+      <ScreenFrame testID={testID} toolbar={toolbar}>
         <LoadingState />
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
   if (error && !page) {
     return (
-      <SafeAreaView
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID={testID}>
+      <ScreenFrame testID={testID} toolbar={toolbar}>
         <ErrorState message={error.userMessage} onRetry={reload} />
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
   if (!page || page.layout.length === 0) {
     return (
-      <SafeAreaView
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID={testID}>
+      <ScreenFrame testID={testID} toolbar={toolbar}>
         <ScrollView
           contentContainerStyle={styles.flexGrow}
           refreshControl={refreshControl}>
           <EmptyState />
         </ScrollView>
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
   return (
-    <SafeAreaView
-      style={[styles.safe, {backgroundColor: colors.background}]}
-      testID={testID}>
+    <ScreenFrame testID={testID} toolbar={toolbar}>
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       <ScrollView
         refreshControl={refreshControl}
@@ -80,6 +74,37 @@ export function CmsPageScreen({slug, testID}: CmsPageScreenProps) {
         ) : null}
         <PageLayout layout={page.layout} />
       </ScrollView>
+    </ScreenFrame>
+  );
+}
+
+function ScreenFrame({
+  testID,
+  toolbar,
+  children,
+}: {
+  testID: string;
+  toolbar?: ReactNode;
+  children: ReactNode;
+}) {
+  const {colors, spacing} = useTheme();
+
+  return (
+    <SafeAreaView
+      style={[styles.safe, {backgroundColor: colors.background}]}
+      testID={testID}>
+      {toolbar ? (
+        <View
+          style={{
+            paddingHorizontal: spacing.md,
+            paddingTop: spacing.sm,
+            paddingBottom: spacing.xs,
+            alignItems: 'flex-end',
+          }}>
+          {toolbar}
+        </View>
+      ) : null}
+      {children}
     </SafeAreaView>
   );
 }

@@ -37,5 +37,7 @@ beforeEach(() => {
 test('renders correctly', async () => {
   await ReactTestRenderer.act(async () => {
     ReactTestRenderer.create(<App />);
+    await Promise.resolve();
+    await Promise.resolve();
   });
 });
