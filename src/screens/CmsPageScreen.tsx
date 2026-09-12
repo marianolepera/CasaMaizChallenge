@@ -1,4 +1,4 @@
-import type {ReactNode} from 'react';
+import {useState, type ReactNode} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {PageLayout} from '../blocks/PageLayout';
@@ -7,21 +7,61 @@ import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
 import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
 import {OfflineBanner} from '../components/molecules/OfflineBanner';
+import {Input} from '../components/atoms/Input';
+import {SearchIcon} from '../components/atoms/SearchIcon';
 import {Text} from '../components/atoms/Text';
 import type {PageSlug} from '../cms/contentClient';
+import {filterLayoutByQuery} from '../cms/menuFilter';
 import {useCmsPage} from '../hooks/useCmsPage';
 import {useTheme} from '../theme';
+
+export const MENU_SEARCH_INPUT_TEST_ID = 'cms-menu-search';
+export const MENU_SEARCH_ICON_TEST_ID = 'cms-menu-search-icon';
 
 export type CmsPageScreenProps = {
   slug: PageSlug;
   testID: string;
   toolbar?: ReactNode;
+  searchable?: boolean;
 };
 
-export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
+export function CmsPageScreen({
+  slug,
+  testID,
+  toolbar,
+  searchable = false,
+}: CmsPageScreenProps) {
   const {colors, spacing} = useTheme();
   const {page, error, loading, refreshing, source, reload, refresh} =
     useCmsPage(slug);
+  const [query, setQuery] = useState('');
+  const visibleLayout = page
+    ? filterLayoutByQuery(page.layout, searchable ? query : '')
+    : [];
+  const searchField = searchable ? (
+    <View
+      style={{
+        paddingHorizontal: spacing.md,
+        paddingBottom: spacing.sm,
+      }}>
+      <Input
+        testID={MENU_SEARCH_INPUT_TEST_ID}
+        value={query}
+        onChangeText={setQuery}
+        placeholder="Buscar en el menú"
+        accessibilityLabel="Buscar en el menú"
+        returnKeyType="search"
+        autoCorrect={false}
+        autoCapitalize="none"
+        leading={
+          <SearchIcon
+            color={colors.textMuted}
+            testID={MENU_SEARCH_ICON_TEST_ID}
+          />
+        }
+      />
+    </View>
+  ) : null;
 
   const refreshControl = (
     <RefreshControl
@@ -50,6 +90,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
   if (!page || page.layout.length === 0) {
     return (
       <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
+        {searchField}
         <ScrollView
           contentContainerStyle={styles.flexGrow}
           refreshControl={refreshControl}>
@@ -62,6 +103,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
   return (
     <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
+      {searchField}
       <ScrollView
         refreshControl={refreshControl}
         contentContainerStyle={{paddingBottom: spacing.xl}}>
@@ -73,7 +115,14 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
             </Text>
           </View>
         ) : null}
-        <PageLayout layout={page.layout} />
+        {visibleLayout.length > 0 ? (
+          <PageLayout layout={visibleLayout} />
+        ) : (
+          <EmptyState
+            title="Sin resultados"
+            message="Probá con otro plato o bebida."
+          />
+        )}
       </ScrollView>
     </ScreenFrame>
   );

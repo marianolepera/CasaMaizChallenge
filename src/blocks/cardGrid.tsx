@@ -55,7 +55,11 @@ export function CardGrid({block}: BlockProps) {
                 style={{borderTopLeftRadius: radius.md, borderTopRightRadius: radius.md}}
               />
               <View style={{padding: spacing.sm, gap: spacing.xxs}}>
-                {cardTitle ? <Text variant="button">{cardTitle}</Text> : null}
+                {cardTitle ? (
+                  <Text variant="button" testID="cms-card-title">
+                    {cardTitle}
+                  </Text>
+                ) : null}
                 {description ? (
                   <Text muted variant="caption">
                     {description}

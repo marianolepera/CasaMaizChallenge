@@ -2,6 +2,10 @@ import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {TEXT_BLOCK_HEADING_TEST_ID} from '../blocks/textBlock';
+import {
+  MENU_SEARCH_ICON_TEST_ID,
+  MENU_SEARCH_INPUT_TEST_ID,
+} from '../screens/CmsPageScreen';
 import type {CmsClient} from '../cms/contentClient';
 import type {ContentEnvelope} from '../cms/envelope';
 import {CmsClientProvider} from '../cms/CmsClientProvider';
@@ -23,6 +27,17 @@ function mockClient(overrides: Partial<CmsClient>): CmsClient {
     getPage: jest.fn(),
     ...overrides,
   };
+}
+
+function cardTitles(tree: ReactTestRenderer.ReactTestRenderer) {
+  return [
+    ...new Set(
+      tree.root
+        .findAllByProps({testID: 'cms-card-title'})
+        .map(node => node.props.children)
+        .filter((value): value is string => typeof value === 'string'),
+    ),
+  ];
 }
 
 function renderMenu(client: CmsClient) {
@@ -73,5 +88,47 @@ describe('MenuScreen', () => {
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
     ).toBe('From the milpa to the table');
     expect(tree.root.findByProps({testID: 'cms-image-block'})).toBeTruthy();
+    expect(tree.root.findByProps({testID: MENU_SEARCH_INPUT_TEST_ID})).toBeTruthy();
+    expect(tree.root.findByProps({testID: MENU_SEARCH_ICON_TEST_ID})).toBeTruthy();
+  });
+
+  it('filters CMS menu dishes as the guest types', async () => {
+    const envelope: ContentEnvelope = {
+      contractVersion: '1.1',
+      data: {
+        title: 'Menu',
+        layout: [
+          {
+            blockType: 'cardGrid',
+            title: 'De la milpa',
+            cards: [
+              {title: 'Esquites', price: '$90'},
+              {title: 'Tacos de suadero', price: '$140'},
+            ],
+          },
+        ],
+      },
+      preview: false,
+    };
+    const tree = renderMenu(
+      mockClient({
+        getPage: jest.fn().mockResolvedValue(envelope) as CmsClient['getPage'],
+      }),
+    );
+
+    await ReactTestRenderer.act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(cardTitles(tree)).toEqual(['Esquites', 'Tacos de suadero']);
+
+    await ReactTestRenderer.act(async () => {
+      tree.root.findByProps({testID: MENU_SEARCH_INPUT_TEST_ID}).props.onChangeText(
+        'esquites',
+      );
+    });
+
+    expect(cardTitles(tree)).toEqual(['Esquites']);
   });
 });

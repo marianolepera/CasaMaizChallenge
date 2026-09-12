@@ -51,5 +51,6 @@ export type {
 } from './bootstrap';
 export {getBlockKey, parseCmsPage, parseLayout} from './page';
 export type {CmsBlock, CmsPage} from './page';
+export {filterLayoutByQuery} from './menuFilter';
 export {parseCmsLegal, parseLexicalPlainText} from './legal';
 export type {CmsLegalDocument} from './legal';

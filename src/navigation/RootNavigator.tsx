@@ -63,6 +63,7 @@ export function RootNavigator() {
           headerTintColor: colors.accent,
           headerStyle: {backgroundColor: colors.surface},
           headerTitleStyle: {color: colors.text},
+          headerBackTitleVisible: false,
           contentStyle: {backgroundColor: colors.background},
         }}>
         <Stack.Screen name="Tabs" options={{headerShown: false}}>
