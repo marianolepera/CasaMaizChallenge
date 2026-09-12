@@ -209,15 +209,15 @@ Intentionally **not** used: Expo, NativeWind, FlashList, LegendList, Reanimated,
 - **Reservations is a placeholder screen, not a fake booking flow.** No transaction API exists; inventing one would look like product work the CMS cannot back.
 - **Feature flags are capability keys, not copy.** `enable_new_home` shows Home promotions once: the page `promoRail` if the layout has it, otherwise `bootstrap.promotions`. The same title/id is not rendered twice. Flag off hides both. `show_store_locator_banner` only renders if the CMS also sends locator copy.
 
-## Known limitations and next
+## Known limitations
 
-What a reviewer can already observe: contextual requests, CMS-driven Home/Menu, CMS tabs and destinations, alerts / notice / update, Privacy from `/legal`, loading / error / refresh / offline, relative and absolute media, unknown-block fallback, Jest suite.
+- Live Home/Menu are short; the page body is a `ScrollView`, not a virtualized feed of blocks.
+- Documented blocks not present in the live payload (`cta`, `content`, `mediaBlock`, `archive`) use the unknown-block fallback.
+- `formBlock` is mocked and never POSTs to the shared public API.
+- Reservations has no transaction API — local placeholder screen only.
+- Maestro visual regression is reliable on Android; iOS XCUITest hangs on Xcode 26.6 ([Maestro #3137](https://github.com/mobile-dev-inc/maestro/issues/3137)).
 
-What I would do next, in order:
-
-1. Reviewer screenshots in `docs/screenshots/` (iOS + Android: Home, Menu, Privacy). Maestro goldens remain under `e2e/maestro/goldens/` — see [e2e/maestro/README.md](e2e/maestro/README.md).
-
-With more time: crash/content telemetry, release-build profiling, and a required-update store URL only if the CMS provides one.
+With more time: crash/content telemetry, release-build profiling on device, and a required-update store URL only if the CMS provides one.
 
 ## Docs
 
