@@ -1,112 +1,197 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Casa Maiz
 
-# Getting Started
+React Native CLI + TypeScript client for the published [Casa Maiz Payload CMS](https://payload-cms-poc-seven.vercel.app/api/docs). The app does not own editorial copy: Home, Menu, Privacy, navigation labels, promotions, alerts, and operational notices come from contract **1.1**.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+The CMS is treated as an external versioned API. This repository does not contain CMS source and must not write to the shared `POST /api/form-submissions` endpoint.
 
-## Step 1: Start Metro
+Default API: `https://payload-cms-poc-seven.vercel.app`  
+OpenAPI: https://payload-cms-poc-seven.vercel.app/api/openapi.json
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+## Prerequisites
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+Follow the official [React Native environment setup](https://reactnative.dev/docs/set-up-your-environment) for your OS. This project is **React Native CLI 0.87**, not Expo.
 
-```sh
-# Using npm
-npm start
+- Node.js **22.11+** (`package.json` `engines`)
+- npm
+- Xcode + CocoaPods (iOS)
+- Android Studio, JDK, and an emulator or device (Android API 24+)
+- Ruby + Bundler for `ios/` CocoaPods (`Gemfile`)
 
-# OR using Yarn
-yarn start
+No API keys. Content endpoints used here are unauthenticated.
+
+## Configuration
+
+The API base URL is a single constant, then injected into the HTTP client:
+
+```ts
+// src/config/api.ts
+export const DEFAULT_API_BASE_URL =
+  'https://payload-cms-poc-seven.vercel.app';
 ```
 
-## Step 2: Build and run your app
+`createCmsClient({ baseUrl })` accepts an override (tests do this). Screens never build URLs.
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Every content GET adds the four required query params from `src/config/contentContext.ts`:
 
-### Android
+| Param | Source |
+|---|---|
+| `platform` | `ios` or `android` from `Platform.OS` |
+| `market` | `MX` |
+| `audience` | `guest` |
+| `appVersion` | semver `1.0.0` (`package.json` version) |
+
+Do not put machine-specific hosts, tokens, or `.env` files in the repo.
+
+### Emulator and device networking
+
+The default base URL is public HTTPS. Simulator, emulator, and physical devices reach it with no extra hosts.
+
+If you point `DEFAULT_API_BASE_URL` at a CMS on your machine:
+
+| Target | Host to use |
+|---|---|
+| iOS Simulator | `http://localhost:<port>` |
+| Android Emulator | `http://10.0.2.2:<port>` ([Android emulator networking](https://developer.android.com/studio/run/emulator-networking)) |
+| Physical device | Your computer's LAN IP, and the device on the same network |
+
+HTTP (not HTTPS) on Android also needs cleartext permitted for that host. Keep that change local; do not commit debug cleartext for a public review build.
+
+## Install
 
 ```sh
-# Using npm
-npm run android
-
-# OR using Yarn
-yarn android
+git clone <this-repo>
+cd CasaMaizChallenge
+npm install
 ```
 
-### iOS
-
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
-
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+iOS native modules:
 
 ```sh
 bundle install
+bundle exec pod install --project-directory=ios
 ```
 
-Then, and every time you update your native dependencies, run:
+## Run
+
+Start Metro, then the platform binary:
 
 ```sh
-bundle exec pod install
+npm start
 ```
 
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
 ```sh
-# Using npm
 npm run ios
-
-# OR using Yarn
-yarn ios
+# or
+npm run android
 ```
 
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
+iOS bundle id: the Xcode target `CasaMaizChallenge`.  
+Android application id: `com.casamaizchallenge`.
 
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
+Deep links (bonus): `casamaiz://`, `casamaiz://menu`, `casamaiz://legal/privacy_policy`. Reservations (`casamaiz://reservas`) is a local placeholder, not a CMS transaction.
 
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Performance
-
-Notes from the current architecture (lists, prefetch, cache, Reduce Motion) and how to profile on a device: [docs/performance.md](docs/performance.md). There are no checked-in FPS or Systrace captures — measure with the [React Native profiling guide](https://reactnative.dev/docs/profiling) on a release build.
-
-# Visual regression
-
-iOS Simulator only. Install [Maestro](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli), boot the same device used for the goldens, run `npm start` and `npm run ios`, then:
+## Quality commands
 
 ```sh
-npm run test:visual:update   # first run, or after an intentional UI change
-npm run test:visual          # compare against e2e/maestro/goldens
+npm run typecheck   # tsc --noEmit
+npm run lint        # ESLint
+npm test            # Jest
 ```
 
-See [e2e/maestro/README.md](e2e/maestro/README.md) for crop/threshold env vars and when **not** to refresh goldens (live CMS copy can change).
+Optional:
 
-# Troubleshooting
+```sh
+npm run cms:types              # regenerate src/cms/generated/openapi.ts
+npm run test:visual:android    # Maestro + pixelmatch (see e2e/maestro/README.md)
+```
 
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+## Architecture
 
-# Learn More
+Screens do not fetch, build query strings, or parse destinations.
 
-To learn more about React Native, take a look at the following resources:
+```
+config → api transport → Zod models → repository/cache
+       → app state → destination resolver → block registry → screens
+```
 
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+| Layer | Role |
+|---|---|
+| `src/config` | Base URL, market, audience, app version |
+| `src/api` | `fetch`, non-2xx, malformed JSON, `AbortSignal` |
+| `src/cms` | Envelope 1.1, bootstrap/page/legal parsers, media URLs |
+| `src/repository` | Last successful envelope; refuse cache past `nextChangeAt` |
+| `src/navigation` | CMS paths → native stack/tabs; validate external URLs |
+| `src/blocks` | `blockType` → component; unknown types render a fallback |
+| `src/screens` | Presentation, loading / empty / retry / offline banners |
+
+Home and Menu render `data.layout` through `src/blocks/registry.ts`. Adding a documented block is a registry entry plus a component; screens stay unchanged.
+
+Bootstrap drives tabs, top-bar alerts, kitchen/operational notice, and recommended or required app update. Missing optional bootstrap fields leave the app usable.
+
+Privacy loads `GET /api/content/v1/legal/privacy_policy`. Reservations (`/reservas`) shows a local alert because no reservation API is documented.
+
+### OpenAPI types vs Zod
+
+Both are used, for different jobs.
+
+- **Generated OpenAPI** (`npm run cms:types` → `src/cms/generated/openapi.ts`) is compile-time only. It documents the published contract and types query params / form body shapes. TypeScript erases it; nothing in that folder runs on the device. Tool: [openapi-typescript](https://openapi-ts.dev/introduction).
+- **Zod** parsers (`envelope`, `page`, `bootstrap`, …) are the runtime contract. They accept `unknown` JSON, keep the fields the app uses, tolerate extra keys, and fail safely on a bad `contractVersion` or a malformed envelope. Library: [Zod](https://zod.dev/).
+
+A generated type is never used as a runtime parser. The spec can be stricter than live payloads (nulls, incomplete blocks). Zod is what we trust after the network.
+
+### Cache and `nextChangeAt`
+
+The repository persists the last successful live envelope (not `preview`, not already expired). If the network fails, still-valid cache is shown with an offline banner. Cache at or after `nextChangeAt` is treated as expired and is not shown as current content. If there has never been a successful load, the UI is a retry state, not a blank screen.
+
+Requests take an `AbortSignal`. Unmount or a newer request aborts the previous `fetch` so a late response cannot overwrite UI.
+
+### Forms
+
+`formBlock` builds the OpenAPI `MobileFormSubmissionRequest` body and submits through `submitFormMock`. It never POSTs to the shared public environment.
+
+## Dependency choices
+
+Kept small on purpose.
+
+| Dependency | Why |
+|---|---|
+| `@react-navigation/native-stack` + `bottom-tabs` | Native stack/tab chrome; already specified for this assessment. Docs: [native stack](https://reactnavigation.org/docs/native-stack-navigator/) |
+| `react-native-screens` / `safe-area-context` | Required peers for React Navigation |
+| `@react-native-async-storage/async-storage` | Persist last successful content. Docs: [Async Storage](https://react-native-async-storage.github.io/async-storage/) |
+| `zod` | Runtime envelope/bootstrap/page validation |
+| `openapi-typescript` (dev) | Generated CMS types |
+| `@types/node` (dev) | Type-check Node helpers used by Maestro compare and `cms:types` tests |
+
+Intentionally **not** used: Expo, NativeWind, FlashList, LegendList, Reanimated, `expo-image`. Images use React Native `Image`. Horizontal rails use `FlatList`. Page bodies use `ScrollView` because live Home/Menu layouts are short.
+
+## Platform behavior
+
+- iOS: native stack back gesture, translucent header when Reduce Transparency is off
+- Android: system back, ripple on pressables, Material-leaning surfaces
+- 44pt minimum targets, `allowFontScaling` with a cap, dark/light theme, Reduce Motion (zero-duration transitions)
+
+## Trade-offs
+
+- **Page `ScrollView` vs a virtualized feed.** Live layouts are a handful of blocks. A FlashList of mixed `blockType`s would add a dependency the assessment asked us not to default to, without changing first paint.
+- **App version is the binary semver we ship (`1.0.0`), not a live store lookup.** That matches the required query format.
+- **Reservations is an alert, not a fake booking flow.** No transaction API exists; inventing one would look like product work the CMS cannot back.
+- **Feature flags and `bootstrap.promotions` are parsed and tested, but not yet wired to a visible screen.** Page `promoRail` on Home/Menu does render. Wiring one flag and bootstrap promos is the next product slice (see below).
+
+## Known limitations and next
+
+What a reviewer can already observe: contextual requests, CMS-driven Home/Menu, CMS tabs and destinations, alerts / notice / update, Privacy from `/legal`, loading / error / refresh / offline, relative and absolute media, unknown-block fallback, Jest suite.
+
+What I would do next, in order:
+
+1. One bootstrap feature flag changing visible UI or a tab, and render `bootstrap.promotions` when the API sends them.
+2. Reviewer screenshots or a short recording from **both** platforms (Android Maestro goldens live under `e2e/maestro/goldens/android/`; iOS Maestro is blocked on Xcode 26.6 / [Maestro #3137](https://github.com/mobile-dev-inc/maestro/issues/3137)).
+3. A dedicated Reservations placeholder screen instead of an alert.
+4. Alert `frequency.type` (`always` / `once` / `session`) beyond cooldown + persisted dismiss.
+
+With more time: crash/content telemetry, release-build profiling ([notes](docs/performance.md)), and a required-update store URL only if the CMS provides one.
+
+## Visual regression and performance
+
+- Visual: [e2e/maestro/README.md](e2e/maestro/README.md)
+- Performance decisions: [docs/performance.md](docs/performance.md)
+- Generated types: [src/cms/generated/README.md](src/cms/generated/README.md)

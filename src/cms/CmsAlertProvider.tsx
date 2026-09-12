@@ -106,10 +106,10 @@ export function usePageAlert(pageSlug: string): {
   alert?: CmsAlert;
   onDismiss?: () => void;
 } {
-  const alerts = useBootstrap()?.alerts ?? [];
+  const alerts = useBootstrap()?.alerts;
   const {dismissedAt, ready, dismissAlert} = useContext(AlertDismissContext);
   const candidate = useMemo(
-    () => selectTopBarAlert(alerts, pageSlug),
+    () => selectTopBarAlert(alerts ?? [], pageSlug),
     [alerts, pageSlug],
   );
   const alertKey = candidate ? alertStorageKey(candidate) : undefined;
