@@ -5,6 +5,19 @@ export {
 export type {SupportedContractVersion} from './contract';
 export {parseContentEnvelope} from './envelope';
 export type {ContentEnvelope, ResolvedContext} from './envelope';
+export type {
+  OpenApiContentEnvelope,
+  OpenApiContentQuery,
+  OpenApiDeliveryContext,
+  OpenApiFormSubmissionRequest,
+  OpenApiFormSubmissionResponse,
+  OpenApiPageEnvelope,
+  OpenApiPageSlug,
+  OpenApiPublicAlert,
+  OpenApiPublicNavigation,
+  OpenApiPublicPage,
+  OpenApiPublicPromotion,
+} from './openapi';
 export {readAlignment, readArray, readNumber, readObject, readString} from './fields';
 export type {TextAlignment} from './fields';
 export {resolveCmsImage, resolveMediaUrl} from './media';

@@ -1,5 +1,6 @@
 import {parseContentEnvelope} from '../cms/envelope';
 import {SUPPORTED_CONTRACT_VERSION} from '../cms/contract';
+import type {OpenApiContentEnvelope} from '../cms/openapi';
 
 const validEnvelope = {
   contractVersion: SUPPORTED_CONTRACT_VERSION,
@@ -16,6 +17,12 @@ const validEnvelope = {
 };
 
 describe('content contract envelope', () => {
+  it('keeps the runtime contract version aligned with the OpenAPI const', () => {
+    const contractVersion: OpenApiContentEnvelope['contractVersion'] =
+      SUPPORTED_CONTRACT_VERSION;
+    expect(contractVersion).toBe('1.1');
+  });
+
   it('accepts contract version 1.1 and keeps used fields', () => {
     expect(parseContentEnvelope(validEnvelope)).toEqual(
       expect.objectContaining({

@@ -1,0 +1,108 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Casa Maiz contract fixture",
+    "version": "1.1"
+  },
+  "paths": {
+    "/api/content/v1/bootstrap": {
+      "get": {
+        "operationId": "getApiContentV1Bootstrap",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/content/v1/pages/{slug}": {
+      "get": {
+        "operationId": "getApiContentV1PagesSlug",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/content/v1/legal/{key}": {
+      "get": {
+        "operationId": "getApiContentV1LegalKey",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/api/form-submissions": {
+      "post": {
+        "operationId": "submitMobileForm",
+        "responses": {
+          "201": {
+            "description": "created"
+          }
+        }
+      }
+    },
+    "/api/media/file/{filename}": {
+      "get": {
+        "operationId": "getApiMediaFileFilename",
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ContentEnvelope": {
+        "type": "object",
+        "required": ["contractVersion"],
+        "properties": {
+          "contractVersion": {
+            "type": "string",
+            "const": "1.1"
+          }
+        }
+      },
+      "PublicPage": {
+        "type": "object",
+        "properties": {
+          "layout": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "blockType": {
+                  "type": "string",
+                  "enum": [
+                    "textBlock",
+                    "formBlock"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      },
+      "MobileFormSubmissionRequest": {
+        "type": "object",
+        "required": ["form", "submissionData"],
+        "properties": {
+          "form": {
+            "type": "string"
+          },
+          "submissionData": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        }
+      }
+    }
+  }
+}

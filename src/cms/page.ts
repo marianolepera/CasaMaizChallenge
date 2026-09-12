@@ -17,6 +17,7 @@ export type CmsBlock = {
   [key: string]: unknown;
 };
 
+/** Runtime page. `OpenApiPublicPage` is the published spec; missing layout must not crash. */
 export type CmsPage = {
   slug?: string;
   title?: string;

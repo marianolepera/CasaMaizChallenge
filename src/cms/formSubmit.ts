@@ -1,23 +1,14 @@
 import type {CmsForm, CmsFormField} from './form';
+import type {
+  OpenApiFormSubmissionRequest,
+  OpenApiFormSubmissionResponse,
+} from './openapi';
 
 export type FormFieldValue = string | boolean;
 
-/**
- * Same body as POST /api/form-submissions.
- * @see https://payload-cms-poc-seven.vercel.app/api/docs
- */
-export type MobileFormSubmissionRequest = {
-  form: string;
-  submissionData: Array<{
-    field: string;
-    value: string | boolean;
-  }>;
-};
-
-export type MobileFormSubmissionResponse = {
-  message: string;
-  doc: {id: string};
-};
+/** Same body as POST /api/form-submissions in the generated OpenAPI spec. */
+export type MobileFormSubmissionRequest = OpenApiFormSubmissionRequest;
+export type MobileFormSubmissionResponse = OpenApiFormSubmissionResponse;
 
 export const MOCK_FORM_CONFIRMATION = 'Recibimos tu mensaje.';
 

@@ -8,8 +8,9 @@ import {
 import {parseContentEnvelope} from './envelope';
 import type {ContentEnvelope} from './envelope';
 import {resolveMediaUrl} from './media';
+import type {OpenApiContentQuery, OpenApiPageSlug} from './openapi';
 
-export type PageSlug = 'home' | 'menu';
+export type PageSlug = OpenApiPageSlug;
 export type LegalKey = 'privacy_policy';
 
 export type CmsClient = {
@@ -33,7 +34,7 @@ export function createCmsClient(options: CmsClientOptions = {}): CmsClient {
   const http = createHttpClient({baseUrl, fetchFn: options.fetchFn});
 
   const getContent = async (path: string, signal?: AbortSignal) => {
-    const query = contentQueryFromRuntime({
+    const query: OpenApiContentQuery = contentQueryFromRuntime({
       platform: getPlatform(),
       appVersion: getAppVersion(),
     });
