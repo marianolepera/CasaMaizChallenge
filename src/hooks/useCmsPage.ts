@@ -5,7 +5,8 @@ import {useCmsClient} from '../cms/CmsClientProvider';
 import type {PageSlug} from '../cms/contentClient';
 import {parseCmsPage} from '../cms/page';
 import type {CmsPage} from '../cms/page';
-import {getRuntimeContentQuery} from '../config';
+import {prefetchPageImages} from '../cms/prefetchImages';
+import {DEFAULT_API_BASE_URL, getRuntimeContentQuery} from '../config';
 import {useContentRepository} from '../repository/ContentRepositoryProvider';
 import type {CacheReadResult} from '../repository/contentRepository';
 
@@ -52,9 +53,11 @@ export function useCmsPage(slug: PageSlug): CmsPageQuery {
           return;
         }
 
-        setPage(parseCmsPage(envelope.data));
+        const parsed = parseCmsPage(envelope.data);
+        setPage(parsed);
         setError(null);
         setSource('network');
+        void prefetchPageImages(parsed.layout, DEFAULT_API_BASE_URL);
 
         try {
           await repository.writePage(slug, context, envelope);
@@ -80,9 +83,11 @@ export function useCmsPage(slug: PageSlug): CmsPageQuery {
         }
 
         if (cached.status === 'hit') {
-          setPage(parseCmsPage(cached.envelope.data));
+          const parsed = parseCmsPage(cached.envelope.data);
+          setPage(parsed);
           setSource('cache');
           setError(cmsError);
+          void prefetchPageImages(parsed.layout, DEFAULT_API_BASE_URL);
           return;
         }
 

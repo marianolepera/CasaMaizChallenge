@@ -1,5 +1,5 @@
 import React from 'react';
-import {Platform} from 'react-native';
+import {Image, Platform} from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {networkError} from '../api/errors';
@@ -79,10 +79,16 @@ async function flush() {
 
 describe('cache and offline fallback', () => {
   const fetchFn = jest.fn();
+  const prefetch = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
 
   beforeEach(() => {
     fetchFn.mockReset();
+    prefetch.mockClear();
     globalThis.fetch = fetchFn as typeof fetch;
+  });
+
+  afterAll(() => {
+    prefetch.mockRestore();
   });
 
   afterEach(() => {

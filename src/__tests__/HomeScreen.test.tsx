@@ -1,4 +1,5 @@
 import React from 'react';
+import {Image} from 'react-native';
 import ReactTestRenderer from 'react-test-renderer';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {networkError} from '../api/errors';
@@ -67,6 +68,16 @@ async function flush() {
 }
 
 describe('HomeScreen', () => {
+  const prefetch = jest.spyOn(Image, 'prefetch').mockResolvedValue(true);
+
+  afterEach(() => {
+    prefetch.mockClear();
+  });
+
+  afterAll(() => {
+    prefetch.mockRestore();
+  });
+
   it('shows a loading state before content arrives', () => {
     const getPage = jest.fn(
       () => new Promise<never>(() => undefined),
@@ -97,6 +108,41 @@ describe('HomeScreen', () => {
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
     ).toBe('Hola CMS');
     expect(() => tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID})).toThrow();
+  });
+
+  it('prefetches page images after a successful load', async () => {
+    const getPage = jest.fn().mockResolvedValue({
+      contractVersion: '1.1',
+      data: {
+        title: 'Casa Maíz',
+        layout: [
+          {
+            blockType: 'imageBlock',
+            image: {url: 'https://cdn.example/home.webp'},
+          },
+        ],
+      },
+      preview: false,
+    }) as CmsClient['getPage'];
+
+    renderHome(mockClient({getPage}));
+    await flush();
+
+    expect(prefetch).toHaveBeenCalledWith('https://cdn.example/home.webp');
+  });
+
+  it('still renders the page when image prefetch fails', async () => {
+    prefetch.mockRejectedValue(new Error('offline'));
+    const getPage = jest.fn().mockResolvedValue(
+      pageEnvelope('Sigue el menú'),
+    ) as CmsClient['getPage'];
+
+    const tree = renderHome(mockClient({getPage}));
+    await flush();
+
+    expect(
+      tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
+    ).toBe('Sigue el menú');
   });
 
   it('shows a retryable error and recovers when there is no cache', async () => {

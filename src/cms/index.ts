@@ -22,6 +22,8 @@ export {readAlignment, readArray, readNumber, readObject, readString} from './fi
 export type {TextAlignment} from './fields';
 export {resolveCmsImage, resolveMediaUrl} from './media';
 export type {ResolvedCmsImage} from './media';
+export {collectPageImageUrls, prefetchPageImages} from './prefetchImages';
+export type {PrefetchImage} from './prefetchImages';
 export {createCmsClient} from './contentClient';
 export type {CmsClient, CmsClientOptions, LegalKey, PageSlug} from './contentClient';
 export {CmsClientProvider, useCmsClient} from './CmsClientProvider';
