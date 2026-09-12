@@ -22,7 +22,7 @@ DerivedData
 *.xcuserstate
 **/.xcode.env.local
 
-# Android/IntelliJ
+# Android
 #
 build/
 .idea
@@ -34,6 +34,8 @@ local.properties
 *.keystore
 !debug.keystore
 .kotlin/
+*.apk
+*.ap_
 
 # node.js
 #

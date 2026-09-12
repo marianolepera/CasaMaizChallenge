@@ -88,7 +88,28 @@ npm run android
 iOS bundle id: the Xcode target `CasaMaizChallenge`.  
 Android application id: `com.casamaizchallenge`.
 
-Deep links (bonus): `casamaiz://`, `casamaiz://menu`, `casamaiz://legal/privacy_policy`. Reservations (`casamaiz://reservas`) is a local placeholder, not a CMS transaction.
+Deep links (bonus): `casamaiz://`, `casamaiz://menu`, `casamaiz://legal/privacy_policy`, `casamaiz://reservas`. Reservations is a local placeholder screen, not a CMS transaction.
+
+## Android debug APK
+
+No APK is committed (binaries bloat git history). Build it locally after `npm install`:
+
+```sh
+cd android
+./gradlew assembleDebug
+```
+
+Output:
+
+`android/app/build/outputs/apk/debug/app-debug.apk`
+
+Install on a device or emulator:
+
+```sh
+adb install -r android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Application id: `com.casamaizchallenge`. Needs the same Android SDK / JDK as `npm run android`. The debug APK still talks to the published Casa Maiz API over HTTPS.
 
 ## Quality commands
 
@@ -107,11 +128,22 @@ npm run test:visual:android    # Maestro + pixelmatch (see e2e/maestro/README.md
 
 ## Architecture
 
-Screens do not fetch, build query strings, or parse destinations.
+Screens do not fetch, build query strings, or parse destinations. Full notes: [docs/architecture.md](docs/architecture.md).
 
-```
-config → api transport → Zod models → repository/cache
-       → app state → destination resolver → block registry → screens
+```mermaid
+flowchart LR
+  CMS["Casa Maiz API<br/>contract 1.1"] --> config["config<br/>base URL + query context"]
+  config --> api["api<br/>fetch · errors · abort"]
+  api --> cms["cms<br/>Zod + OpenAPI types"]
+  cms --> repo["repository<br/>cache · nextChangeAt"]
+  cms --> nav["navigation<br/>destinations · tabs"]
+  cms --> blocks["blocks<br/>blockType registry"]
+  repo --> screens["screens"]
+  nav --> screens
+  blocks --> screens
+  screens --> Home["Home / Menu"]
+  screens --> Legal["Privacy"]
+  screens --> Reservas["Reservations placeholder"]
 ```
 
 | Layer | Role |
@@ -185,10 +217,12 @@ What I would do next, in order:
 
 1. Reviewer screenshots in `docs/screenshots/` (iOS + Android: Home, Menu, Privacy). Maestro goldens remain under `e2e/maestro/goldens/` — see [e2e/maestro/README.md](e2e/maestro/README.md).
 
-With more time: crash/content telemetry, release-build profiling ([notes](docs/performance.md)), and a required-update store URL only if the CMS provides one.
+With more time: crash/content telemetry, release-build profiling, and a required-update store URL only if the CMS provides one.
 
-## Visual regression and performance
+## Docs
 
-- Visual: [e2e/maestro/README.md](e2e/maestro/README.md)
-- Performance decisions: [docs/performance.md](docs/performance.md)
+- Architecture diagram: [docs/architecture.md](docs/architecture.md)
+- Accessibility: [docs/accessibility.md](docs/accessibility.md)
+- Performance: [docs/performance.md](docs/performance.md)
+- Visual regression: [e2e/maestro/README.md](e2e/maestro/README.md)
 - Generated types: [src/cms/generated/README.md](src/cms/generated/README.md)
