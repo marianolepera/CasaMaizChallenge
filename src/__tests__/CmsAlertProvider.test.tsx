@@ -28,7 +28,10 @@ const liveAlert = {
   dismissible: true,
   priority: 100,
   pageSlugs: [] as string[],
-  frequency: {type: 'always', cooldownHours: 24},
+  frequency: {type: 'always', cooldownHours: 24} as {
+    type: string;
+    cooldownHours?: number;
+  },
   trigger: {type: 'load', delayMs: 0},
   actions: [
     {label: 'Ir a google', href: '/legal/privacy_policy'},
@@ -141,5 +144,44 @@ describe('CmsAlertProvider', () => {
     await flush();
 
     expect(() => tree.root.findByProps({testID: CMS_ALERT_TEST_ID})).toThrow();
+  });
+
+  it('does not persist session dismissals across remounts', async () => {
+    const store = createMemoryStore();
+    let {tree} = renderAlert({
+      store,
+      alert: {
+        ...liveAlert,
+        frequency: {type: 'session'},
+      },
+    });
+
+    await flush();
+    expect(
+      tree.root.findByProps({testID: CMS_ALERT_TITLE_TEST_ID}).props.children,
+    ).toBe('Aviso de cierre');
+
+    await ReactTestRenderer.act(async () => {
+      tree.root.findByProps({testID: CMS_ALERT_DISMISS_TEST_ID}).props.onPress();
+    });
+    expect(() => tree.root.findByProps({testID: CMS_ALERT_TEST_ID})).toThrow();
+    expect(await store.getItem(ALERT_DISMISS_STORAGE_KEY)).toBeNull();
+
+    await ReactTestRenderer.act(() => {
+      tree.unmount();
+    });
+
+    ({tree} = renderAlert({
+      store,
+      alert: {
+        ...liveAlert,
+        frequency: {type: 'session'},
+      },
+    }));
+    await flush();
+
+    expect(
+      tree.root.findByProps({testID: CMS_ALERT_TITLE_TEST_ID}).props.children,
+    ).toBe('Aviso de cierre');
   });
 });

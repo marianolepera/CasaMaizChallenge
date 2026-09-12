@@ -126,7 +126,7 @@ config → api transport → Zod models → repository/cache
 
 Home and Menu render `data.layout` through `src/blocks/registry.ts`. Adding a documented block is a registry entry plus a component; screens stay unchanged.
 
-Bootstrap drives tabs, top-bar alerts, kitchen/operational notice, recommended or required app update, and Home promotions when `enable_new_home` is on. Missing optional bootstrap fields leave the app usable.
+Bootstrap drives tabs, top-bar alerts (`frequency.type`: `always` + cooldown, `once`, `session`), kitchen/operational notice, recommended or required app update, and Home promotions when `enable_new_home` is on. Missing optional bootstrap fields leave the app usable.
 
 Privacy loads `GET /api/content/v1/legal/privacy_policy`. Reservations (`/reservas`) opens a local placeholder screen (no reservation API is documented).
 
@@ -184,7 +184,6 @@ What a reviewer can already observe: contextual requests, CMS-driven Home/Menu, 
 What I would do next, in order:
 
 1. Reviewer screenshots in `docs/screenshots/` (iOS + Android: Home, Menu, Privacy). Maestro goldens remain under `e2e/maestro/goldens/` — see [e2e/maestro/README.md](e2e/maestro/README.md).
-2. Alert `frequency.type` (`always` / `once` / `session`) beyond cooldown + persisted dismiss.
 
 With more time: crash/content telemetry, release-build profiling ([notes](docs/performance.md)), and a required-update store URL only if the CMS provides one.
 

@@ -35,9 +35,12 @@ export {
   alertStorageKey,
   appliesToPage,
   isAlertOnCooldown,
+  normalizeAlertFrequencyType,
   parseDismissedAtMap,
   selectTopBarAlert,
+  shouldPersistAlertDismiss,
 } from './alerts';
+export type {AlertFrequencyType} from './alerts';
 export {
   APP_UPDATE_DISMISS_KEY,
   compareSemver,

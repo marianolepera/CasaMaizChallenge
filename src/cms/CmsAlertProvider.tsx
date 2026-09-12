@@ -14,8 +14,10 @@ import {
   ALERT_DISMISS_STORAGE_KEY,
   alertStorageKey,
   isAlertOnCooldown,
+  normalizeAlertFrequencyType,
   parseDismissedAtMap,
   selectTopBarAlert,
+  shouldPersistAlertDismiss,
 } from './alerts';
 import type {CmsAlert} from './bootstrap';
 import {useBootstrap} from './CmsBootstrapProvider';
@@ -24,12 +26,14 @@ const defaultAlertStore = createAsyncStorageStore();
 
 type AlertDismissContextValue = {
   dismissedAt: Record<string, number>;
+  sessionDismissed: ReadonlySet<string>;
   ready: boolean;
-  dismissAlert: (key: string) => void;
+  dismissAlert: (alert: CmsAlert) => void;
 };
 
 const AlertDismissContext = createContext<AlertDismissContextValue>({
   dismissedAt: {},
+  sessionDismissed: new Set(),
   ready: true,
   dismissAlert: () => undefined,
 });
@@ -44,9 +48,14 @@ export function CmsAlertProvider({
   store = defaultAlertStore,
 }: CmsAlertProviderProps) {
   const [dismissedAt, setDismissedAt] = useState<Record<string, number>>({});
+  const [sessionDismissed, setSessionDismissed] = useState<ReadonlySet<string>>(
+    () => new Set(),
+  );
   const [ready, setReady] = useState(false);
   const dismissedAtRef = useRef(dismissedAt);
   dismissedAtRef.current = dismissedAt;
+  const sessionDismissedRef = useRef(sessionDismissed);
+  sessionDismissedRef.current = sessionDismissed;
 
   useEffect(() => {
     let cancelled = false;
@@ -78,8 +87,18 @@ export function CmsAlertProvider({
   }, [store]);
 
   const dismissAlert = useCallback(
-    (key: string) => {
+    (alert: CmsAlert) => {
+      const key = alertStorageKey(alert);
       const at = Date.now();
+
+      if (!shouldPersistAlertDismiss(alert)) {
+        const next = new Set(sessionDismissedRef.current);
+        next.add(key);
+        sessionDismissedRef.current = next;
+        setSessionDismissed(next);
+        return;
+      }
+
       const next = {...dismissedAtRef.current, [key]: at};
       dismissedAtRef.current = next;
       setDismissedAt(next);
@@ -91,8 +110,8 @@ export function CmsAlertProvider({
   );
 
   const value = useMemo(
-    () => ({dismissedAt, ready, dismissAlert}),
-    [dismissAlert, dismissedAt, ready],
+    () => ({dismissedAt, sessionDismissed, ready, dismissAlert}),
+    [dismissAlert, dismissedAt, ready, sessionDismissed],
   );
 
   return (
@@ -107,18 +126,26 @@ export function usePageAlert(pageSlug: string): {
   onDismiss?: () => void;
 } {
   const alerts = useBootstrap()?.alerts;
-  const {dismissedAt, ready, dismissAlert} = useContext(AlertDismissContext);
+  const {dismissedAt, sessionDismissed, ready, dismissAlert} =
+    useContext(AlertDismissContext);
   const candidate = useMemo(
     () => selectTopBarAlert(alerts ?? [], pageSlug),
     [alerts, pageSlug],
   );
   const alertKey = candidate ? alertStorageKey(candidate) : undefined;
+  const frequencyType = candidate
+    ? normalizeAlertFrequencyType(candidate.frequency?.type)
+    : 'always';
+  const dismissedStamp =
+    alertKey === undefined
+      ? undefined
+      : frequencyType === 'session'
+        ? sessionDismissed.has(alertKey)
+          ? 1
+          : undefined
+        : dismissedAt[alertKey];
   const onCooldown = candidate
-    ? isAlertOnCooldown(
-        candidate,
-        alertKey ? dismissedAt[alertKey] : undefined,
-        Date.now(),
-      )
+    ? isAlertOnCooldown(candidate, dismissedStamp, Date.now())
     : true;
   const delayMs = candidate?.trigger?.delayMs ?? 0;
   const [elapsed, setElapsed] = useState(false);
@@ -149,8 +176,8 @@ export function usePageAlert(pageSlug: string): {
   return {
     alert: visible ? candidate : undefined,
     onDismiss:
-      visible && candidate?.dismissible && alertKey
-        ? () => dismissAlert(alertKey)
+      visible && candidate?.dismissible
+        ? () => dismissAlert(candidate)
         : undefined,
   };
 }

@@ -4,6 +4,8 @@ export const ALERT_DISMISS_STORAGE_KEY = 'cms-alerts:v1:dismissed';
 
 const HOUR_MS = 60 * 60 * 1000;
 
+export type AlertFrequencyType = 'always' | 'once' | 'session';
+
 export function alertStorageKey(alert: CmsAlert): string {
   return alert.id ?? `${alert.title ?? ''}:${alert.message ?? ''}`;
 }
@@ -12,6 +14,26 @@ export function appliesToPage(alert: CmsAlert, pageSlug: string): boolean {
   return alert.pageSlugs.length === 0 || alert.pageSlugs.includes(pageSlug);
 }
 
+export function normalizeAlertFrequencyType(
+  type: string | undefined,
+): AlertFrequencyType {
+  const key = type?.trim().toLowerCase();
+  if (key === 'once' || key === 'session') {
+    return key;
+  }
+  return 'always';
+}
+
+export function shouldPersistAlertDismiss(alert: CmsAlert): boolean {
+  return normalizeAlertFrequencyType(alert.frequency?.type) !== 'session';
+}
+
+/**
+ * Whether a previously dismissed alert should stay hidden.
+ * - once: forever after dismiss (persisted)
+ * - session: for this process only (memory)
+ * - always: until cooldownHours elapses; without cooldown, may show again
+ */
 export function isAlertOnCooldown(
   alert: CmsAlert,
   dismissedAt: number | undefined,
@@ -21,9 +43,15 @@ export function isAlertOnCooldown(
     return false;
   }
 
+  const type = normalizeAlertFrequencyType(alert.frequency?.type);
+
+  if (type === 'once' || type === 'session') {
+    return true;
+  }
+
   const hours = alert.frequency?.cooldownHours;
   if (hours === undefined || hours <= 0) {
-    return true;
+    return false;
   }
 
   return now - dismissedAt < hours * HOUR_MS;
