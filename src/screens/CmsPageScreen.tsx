@@ -114,6 +114,9 @@ export function CmsPageScreen({
         overlayInset={overlayInset}>
         {searchField}
         <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
+          automaticallyAdjustKeyboardInsets
           contentContainerStyle={[styles.flexGrow, {paddingBottom: overlayInset}]}
           refreshControl={refreshControl}>
           <EmptyState />
@@ -131,6 +134,9 @@ export function CmsPageScreen({
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       {searchField}
       <ScrollView
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+        automaticallyAdjustKeyboardInsets
         refreshControl={refreshControl}
         contentContainerStyle={{paddingBottom: spacing.xl + overlayInset}}>
         {page.title ? (

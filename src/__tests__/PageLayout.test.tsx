@@ -8,6 +8,9 @@ import {
   IMAGE_BLOCK_TEST_ID,
 } from '../blocks/imageBlock';
 import {
+  FORM_BLOCK_TEST_ID,
+} from '../blocks/formBlock';
+import {
   TEXT_BLOCK_HEADING_TEST_ID,
   TEXT_BLOCK_TEST_ID,
 } from '../blocks/textBlock';
@@ -117,5 +120,27 @@ describe('CMS page layout renderer', () => {
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props
         .children,
     ).toBe('Sigue el menú');
+  });
+
+  it('registers formBlock and skips an incomplete form without crashing', () => {
+    const tree = renderLayout([
+      {
+        blockType: 'formBlock',
+        form: {
+          id: 'contact-form-id',
+          submitButtonLabel: 'Enviar',
+          fields: [
+            {blockType: 'text', name: 'name', label: 'Nombre', required: true},
+          ],
+        },
+      },
+      {blockType: 'formBlock'},
+      {blockType: 'textBlock', heading: 'Después del form'},
+    ]);
+
+    expect(tree.root.findByProps({testID: FORM_BLOCK_TEST_ID})).toBeTruthy();
+    expect(
+      tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
+    ).toBe('Después del form');
   });
 });

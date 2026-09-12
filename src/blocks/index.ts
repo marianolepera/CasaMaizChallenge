@@ -13,4 +13,13 @@ export {
   IMAGE_BLOCK_CAPTION_TEST_ID,
   IMAGE_BLOCK_TEST_ID,
 } from './imageBlock';
+export {
+  FormBlock,
+  FORM_BLOCK_CONFIRMATION_TEST_ID,
+  FORM_BLOCK_SUBMIT_TEST_ID,
+  FORM_BLOCK_TEST_ID,
+  REQUIRED_FIELD_MESSAGE,
+  formFieldErrorTestId,
+  formFieldTestId,
+} from './formBlock';
 export type {BlockComponent, BlockProps} from './types';
