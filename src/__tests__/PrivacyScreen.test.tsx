@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import {HeaderHeightContext} from '@react-navigation/elements';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {networkError} from '../api/errors';
 import type {CmsClient} from '../cms/contentClient';
@@ -55,7 +56,10 @@ function legalEnvelope(): ContentEnvelope {
   };
 }
 
-function renderPrivacy(client: CmsClient) {
+function renderPrivacy(
+  client: CmsClient,
+  headerHeight?: number,
+) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
@@ -63,7 +67,9 @@ function renderPrivacy(client: CmsClient) {
         <CmsClientProvider client={client}>
           <ContentRepositoryProvider
             repository={createContentRepository(createMemoryStore())}>
-            <PrivacyScreen />
+            <HeaderHeightContext.Provider value={headerHeight}>
+              <PrivacyScreen />
+            </HeaderHeightContext.Provider>
           </ContentRepositoryProvider>
         </CmsClientProvider>
       </SafeAreaProvider>,
@@ -118,5 +124,22 @@ describe('PrivacyScreen', () => {
     await flush();
 
     expect(tree.root.findByProps({testID: 'cms-error-state'})).toBeTruthy();
+  });
+
+  it('offsets banners below a glass header', async () => {
+    const tree = renderPrivacy(
+      mockClient({
+        getLegal: jest
+          .fn()
+          .mockResolvedValue(legalEnvelope()) as CmsClient['getLegal'],
+      }),
+      96,
+    );
+
+    await flush();
+
+    expect(tree.root.findByProps({testID: 'privacy-screen'}).props.style).toEqual(
+      expect.arrayContaining([expect.objectContaining({paddingTop: 96})]),
+    );
   });
 });

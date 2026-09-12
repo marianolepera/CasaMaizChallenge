@@ -8,11 +8,14 @@ import {CmsAlertProvider} from '../cms/CmsAlertProvider';
 import {CmsBootstrapProvider} from '../cms/CmsBootstrapProvider';
 import type {CmsBootstrap} from '../cms/bootstrap';
 import {useCmsBootstrap} from '../hooks/useCmsBootstrap';
+import {useGlassChrome} from '../hooks/useGlassChrome';
 import {AppUpdateGate} from '../screens/AppUpdateScreen';
 import {HomeScreen} from '../screens/HomeScreen';
 import {MenuScreen} from '../screens/MenuScreen';
 import {PrivacyScreen} from '../screens/PrivacyScreen';
 import {useTheme} from '../theme';
+import {stackChromeOptions} from './stackChrome';
+import {tabChromeStyle} from './tabChrome';
 import {resolveTabIconKey, TabBarIcon} from './tabIcons';
 import {
   privacyTabLabel,
@@ -32,7 +35,8 @@ const TAB_SCREENS: Record<TabRouteName, ComponentType> = {
 };
 
 export function RootNavigator() {
-  const {colors} = useTheme();
+  const {colors, isDark} = useTheme();
+  const {allowGlass} = useGlassChrome();
   const {bootstrap, error, loading, reload} = useCmsBootstrap();
 
   if (loading && !bootstrap) {
@@ -61,9 +65,8 @@ export function RootNavigator() {
       <Stack.Navigator
         screenOptions={{
           headerTintColor: colors.accent,
-          headerStyle: {backgroundColor: colors.surface},
           headerTitleStyle: {color: colors.text},
-          headerBackTitleVisible: false,
+          headerBackButtonDisplayMode: 'minimal',
           contentStyle: {backgroundColor: colors.background},
         }}>
         <Stack.Screen name="Tabs" options={{headerShown: false}}>
@@ -72,7 +75,10 @@ export function RootNavigator() {
         <Stack.Screen
           name="Privacy"
           component={PrivacyScreen}
-          options={{title: privacyLabel ?? ''}}
+          options={{
+            title: privacyLabel ?? '',
+            ...stackChromeOptions({allowGlass, isDark, colors}),
+          }}
         />
       </Stack.Navigator>
     </BootstrappedApp>
@@ -99,6 +105,7 @@ function BootstrappedApp({
 
 function MainTabs({routes}: {routes: TabRoute[]}) {
   const {colors, minTouchTarget} = useTheme();
+  const {allowGlass} = useGlassChrome();
 
   return (
     <Tab.Navigator
@@ -107,11 +114,7 @@ function MainTabs({routes}: {routes: TabRoute[]}) {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: {
-          backgroundColor: colors.surface,
-          borderTopColor: colors.border,
-          minHeight: minTouchTarget,
-        },
+        tabBarStyle: tabChromeStyle({allowGlass, colors, minTouchTarget}),
         tabBarItemStyle: {minHeight: minTouchTarget},
       }}>
       {routes.map(route => (

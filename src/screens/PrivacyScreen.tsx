@@ -1,5 +1,6 @@
-import type {ReactNode} from 'react';
+import {useContext, type ReactNode} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
+import {HeaderHeightContext} from '@react-navigation/elements';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
@@ -8,6 +9,7 @@ import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
 import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Text} from '../components/atoms/Text';
 import {useCmsLegal} from '../hooks/useCmsLegal';
+import {useGlassChrome} from '../hooks/useGlassChrome';
 import {useTheme} from '../theme';
 
 export const LEGAL_TITLE_TEST_ID = 'cms-legal-title';
@@ -94,11 +96,17 @@ export function PrivacyScreen() {
 
 function ScreenFrame({children}: {children: ReactNode}) {
   const {colors} = useTheme();
+  const {allowGlass} = useGlassChrome();
+  const headerHeight = useContext(HeaderHeightContext) ?? 0;
+  const topInset = allowGlass ? headerHeight : 0;
 
   return (
     <SafeAreaView
       edges={['bottom']}
-      style={[styles.safe, {backgroundColor: colors.background}]}
+      style={[
+        styles.safe,
+        {backgroundColor: colors.background, paddingTop: topInset},
+      ]}
       testID="privacy-screen">
       <CmsScreenBanners pageSlug="privacy_policy" />
       {children}

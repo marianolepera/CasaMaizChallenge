@@ -1,6 +1,6 @@
 import {useState, type ReactNode} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
-import {SafeAreaView} from 'react-native-safe-area-context';
+import {SafeAreaView, useSafeAreaInsets} from 'react-native-safe-area-context';
 import {PageLayout} from '../blocks/PageLayout';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
@@ -13,7 +13,8 @@ import {Text} from '../components/atoms/Text';
 import type {PageSlug} from '../cms/contentClient';
 import {filterLayoutByQuery} from '../cms/menuFilter';
 import {useCmsPage} from '../hooks/useCmsPage';
-import {useTheme} from '../theme';
+import {useGlassChrome} from '../hooks/useGlassChrome';
+import {tabBarOverlayInset, useTheme} from '../theme';
 
 export const MENU_SEARCH_INPUT_TEST_ID = 'cms-menu-search';
 export const MENU_SEARCH_ICON_TEST_ID = 'cms-menu-search-icon';
@@ -31,7 +32,12 @@ export function CmsPageScreen({
   toolbar,
   searchable = false,
 }: CmsPageScreenProps) {
-  const {colors, spacing} = useTheme();
+  const {colors, minTouchTarget, spacing} = useTheme();
+  const {allowGlass} = useGlassChrome();
+  const insets = useSafeAreaInsets();
+  const overlayInset = allowGlass
+    ? tabBarOverlayInset(insets.bottom, minTouchTarget)
+    : 0;
   const {page, error, loading, refreshing, source, reload, refresh} =
     useCmsPage(slug);
   const [query, setQuery] = useState('');
@@ -73,26 +79,42 @@ export function CmsPageScreen({
 
   if (loading && !page) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
-        <LoadingState />
+      <ScreenFrame
+        testID={testID}
+        toolbar={toolbar}
+        pageSlug={slug}
+        overlayInset={overlayInset}>
+        <View style={{flex: 1, paddingBottom: overlayInset}}>
+          <LoadingState />
+        </View>
       </ScreenFrame>
     );
   }
 
   if (error && !page) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
-        <ErrorState message={error.userMessage} onRetry={reload} />
+      <ScreenFrame
+        testID={testID}
+        toolbar={toolbar}
+        pageSlug={slug}
+        overlayInset={overlayInset}>
+        <View style={{flex: 1, paddingBottom: overlayInset}}>
+          <ErrorState message={error.userMessage} onRetry={reload} />
+        </View>
       </ScreenFrame>
     );
   }
 
   if (!page || page.layout.length === 0) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
+      <ScreenFrame
+        testID={testID}
+        toolbar={toolbar}
+        pageSlug={slug}
+        overlayInset={overlayInset}>
         {searchField}
         <ScrollView
-          contentContainerStyle={styles.flexGrow}
+          contentContainerStyle={[styles.flexGrow, {paddingBottom: overlayInset}]}
           refreshControl={refreshControl}>
           <EmptyState />
         </ScrollView>
@@ -101,12 +123,16 @@ export function CmsPageScreen({
   }
 
   return (
-    <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
+    <ScreenFrame
+      testID={testID}
+      toolbar={toolbar}
+      pageSlug={slug}
+      overlayInset={overlayInset}>
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       {searchField}
       <ScrollView
         refreshControl={refreshControl}
-        contentContainerStyle={{paddingBottom: spacing.xl}}>
+        contentContainerStyle={{paddingBottom: spacing.xl + overlayInset}}>
         {page.title ? (
           <View
             style={{paddingHorizontal: spacing.md, paddingBottom: spacing.sm}}>
@@ -132,17 +158,20 @@ function ScreenFrame({
   testID,
   toolbar,
   pageSlug,
+  overlayInset,
   children,
 }: {
   testID: string;
   toolbar?: ReactNode;
   pageSlug: string;
+  overlayInset: number;
   children: ReactNode;
 }) {
   const {colors, spacing} = useTheme();
 
   return (
     <SafeAreaView
+      edges={overlayInset > 0 ? ['top', 'left', 'right'] : undefined}
       style={[styles.safe, {backgroundColor: colors.background}]}
       testID={testID}>
       {toolbar ? (
