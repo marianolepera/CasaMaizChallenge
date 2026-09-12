@@ -1,0 +1,22 @@
+appId: ${APP_ID}
+name: Home layout
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 30000
+- tapOn:
+    id: cms-app-update-dismiss
+    optional: true
+- tapOn:
+    id: cms-alert-dismiss
+    optional: true
+- extendedWaitUntil:
+    visible:
+      id: cms-page-layout
+    timeout: 30000
+- waitForAnimationToEnd
+- takeScreenshot:
+    path: 01-home
+    label: Home layout golden

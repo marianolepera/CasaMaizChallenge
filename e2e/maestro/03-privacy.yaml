@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+name: Privacy deep link
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 30000
+- openLink: casamaiz://legal/privacy_policy
+- extendedWaitUntil:
+    visible:
+      id: privacy-screen
+    timeout: 30000
+- assertVisible:
+    id: cms-legal-title
+- waitForAnimationToEnd
+- takeScreenshot:
+    path: 03-privacy
+    label: Privacy layout golden

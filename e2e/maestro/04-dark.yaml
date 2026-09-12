@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+name: Dark mode toggle
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 30000
+- tapOn:
+    id: cms-app-update-dismiss
+    optional: true
+- tapOn:
+    id: cms-alert-dismiss
+    optional: true
+- tapOn:
+    id: cms-appearance-control
+- assertVisible:
+    id: home-screen
+- assertVisible:
+    id: cms-appearance-control
+- waitForAnimationToEnd
+- takeScreenshot:
+    path: 04-dark
+    label: Dark mode golden

@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+name: Menu layout
+---
+- launchApp
+- extendedWaitUntil:
+    visible:
+      id: home-screen
+    timeout: 30000
+- tapOn:
+    id: cms-app-update-dismiss
+    optional: true
+- tapOn:
+    id: cms-alert-dismiss
+    optional: true
+- tapOn:
+    id: cms-tab-Menu
+- extendedWaitUntil:
+    visible:
+      id: menu-screen
+    timeout: 15000
+- extendedWaitUntil:
+    visible:
+      id: cms-page-layout
+    timeout: 30000
+- assertVisible:
+    id: cms-menu-search
+- waitForAnimationToEnd
+- takeScreenshot:
+    path: 02-menu
+    label: Menu layout golden

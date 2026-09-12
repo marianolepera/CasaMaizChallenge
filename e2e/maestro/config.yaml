@@ -1,0 +1,9 @@
+# Visual regression (Maestro). iOS first; Android via VISUAL_PLATFORM=android.
+# iOS bundle id: org.reactjs.native.example.CasaMaizChallenge
+# Android applicationId: com.casamaizchallenge
+# Screenshots: https://docs.maestro.dev/reference/commands-available/takescreenshot
+# Install: https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli
+appId: org.reactjs.native.example.CasaMaizChallenge
+name: Casa Maiz visual
+env:
+  APP_ID: org.reactjs.native.example.CasaMaizChallenge

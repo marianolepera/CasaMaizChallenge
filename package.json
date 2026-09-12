@@ -8,7 +8,11 @@
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest",
-    "cms:types": "node scripts/generate-cms-types.mjs"
+    "cms:types": "node scripts/generate-cms-types.mjs",
+    "test:visual": "bash scripts/test-visual.sh",
+    "test:visual:update": "VISUAL_UPDATE=1 bash scripts/test-visual.sh",
+    "test:visual:android": "VISUAL_PLATFORM=android bash scripts/test-visual.sh",
+    "test:visual:android:update": "VISUAL_PLATFORM=android VISUAL_UPDATE=1 bash scripts/test-visual.sh"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^3.1.1",
@@ -41,6 +45,8 @@
     "eslint": "^8.19.0",
     "jest": "^29.6.3",
     "openapi-typescript": "^7.13.0",
+    "pixelmatch": "^7.2.0",
+    "pngjs": "^7.0.0",
     "prettier": "2.8.8",
     "react-test-renderer": "19.2.3",
     "typescript": "^6.0.3"

@@ -82,6 +82,17 @@ You've successfully run and modified your React Native App. :partying_face:
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
+# Visual regression
+
+iOS Simulator only. Install [Maestro](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli), boot the same device used for the goldens, run `npm start` and `npm run ios`, then:
+
+```sh
+npm run test:visual:update   # first run, or after an intentional UI change
+npm run test:visual          # compare against e2e/maestro/goldens
+```
+
+See [e2e/maestro/README.md](e2e/maestro/README.md) for crop/threshold env vars and when **not** to refresh goldens (live CMS copy can change).
+
 # Troubleshooting
 
 If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
