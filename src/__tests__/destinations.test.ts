@@ -43,7 +43,6 @@ describe('destination handler', () => {
   const actions = {
     openExternal: jest.fn(),
     openInternal: jest.fn(),
-    notifyReservationsUnavailable: jest.fn(),
     notifyUnsupported: jest.fn(),
   };
 
@@ -51,24 +50,19 @@ describe('destination handler', () => {
     jest.clearAllMocks();
   });
 
-  it('opens menu and privacy through the navigator', () => {
+  it('opens menu, privacy, and reservations through the navigator', () => {
     handleResolvedDestination({kind: 'internal', path: '/menu'}, actions);
     handleResolvedDestination(
       {kind: 'internal', path: '/legal/privacy_policy'},
       actions,
     );
     handleResolvedDestination({kind: 'internal', path: '/'}, actions);
+    handleResolvedDestination({kind: 'internal', path: '/reservas'}, actions);
 
     expect(actions.openInternal).toHaveBeenCalledWith('/menu');
     expect(actions.openInternal).toHaveBeenCalledWith('/legal/privacy_policy');
     expect(actions.openInternal).toHaveBeenCalledWith('/');
-  });
-
-  it('keeps reservations as a local placeholder', () => {
-    handleResolvedDestination({kind: 'internal', path: '/reservas'}, actions);
-
-    expect(actions.notifyReservationsUnavailable).toHaveBeenCalled();
-    expect(actions.openInternal).not.toHaveBeenCalled();
+    expect(actions.openInternal).toHaveBeenCalledWith('/reservas');
   });
 
   it('opens https destinations and rejects unsupported ones safely', () => {

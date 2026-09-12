@@ -17,7 +17,7 @@ describe('app linking', () => {
     });
   });
 
-  it('opens Home, Menu, and Privacy from the linking config', () => {
+  it('opens Home, Menu, Privacy, and Reservations from the linking config', () => {
     expect(appLinking.prefixes).toEqual(['casamaiz://']);
     expect(appLinking.getStateFromPath?.('menu', linkingOptions)?.routes[0]).toMatchObject({
       name: 'Tabs',
@@ -26,10 +26,12 @@ describe('app linking', () => {
       appLinking.getStateFromPath?.('legal/privacy_policy', linkingOptions)
         ?.routes[0],
     ).toMatchObject({name: 'Privacy'});
+    expect(
+      appLinking.getStateFromPath?.('reservas', linkingOptions)?.routes[0],
+    ).toMatchObject({name: 'Reservations'});
   });
 
-  it('keeps reservas as a placeholder and ignores unknown paths', () => {
-    expect(appLinking.getStateFromPath?.('reservas', linkingOptions)).toBeUndefined();
+  it('ignores unknown paths safely', () => {
     expect(appLinking.getStateFromPath?.('no-existe', linkingOptions)).toBeUndefined();
   });
 });

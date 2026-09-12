@@ -18,8 +18,9 @@ export type ResolvedDestination =
 
 export type DestinationActions = {
   openExternal: (url: string) => void;
-  openInternal: (path: '/' | '/menu' | '/legal/privacy_policy') => void;
-  notifyReservationsUnavailable: () => void;
+  openInternal: (
+    path: '/' | '/menu' | '/reservas' | '/legal/privacy_policy',
+  ) => void;
   notifyUnsupported: () => void;
 };
 
@@ -29,9 +30,6 @@ export const defaultDestinationActions: DestinationActions = {
   },
   openInternal(path) {
     navigateToInternalPath(path);
-  },
-  notifyReservationsUnavailable() {
-    Alert.alert('Reservas', 'Las reservas estarán disponibles pronto.');
   },
   notifyUnsupported() {
     Alert.alert('No disponible', 'Esta sección no está disponible.');
@@ -86,11 +84,6 @@ export function handleResolvedDestination(
   }
 
   if (destination.kind === 'internal') {
-    if (destination.path === '/reservas') {
-      actions.notifyReservationsUnavailable();
-      return;
-    }
-
     actions.openInternal(destination.path);
     return;
   }

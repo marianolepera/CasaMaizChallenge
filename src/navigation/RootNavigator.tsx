@@ -14,12 +14,14 @@ import {AppUpdateGate} from '../screens/AppUpdateScreen';
 import {HomeScreen} from '../screens/HomeScreen';
 import {MenuScreen} from '../screens/MenuScreen';
 import {PrivacyScreen} from '../screens/PrivacyScreen';
+import {ReservationsScreen} from '../screens/ReservationsScreen';
 import {useTheme} from '../theme';
 import {stackChromeOptions} from './stackChrome';
 import {tabChromeStyle} from './tabChrome';
 import {resolveTabIconKey, TabBarIcon} from './tabIcons';
 import {
   privacyTabLabel,
+  reservationsNavLabel,
   toTabRoutes,
   type MainTabParamList,
   type RootStackParamList,
@@ -60,6 +62,9 @@ export function RootNavigator() {
   const privacyLabel = bootstrap
     ? privacyTabLabel(bootstrap.navigation)
     : undefined;
+  const reservationsLabel = bootstrap
+    ? reservationsNavLabel(bootstrap.navigation)
+    : undefined;
 
   return (
     <BootstrappedApp bootstrap={bootstrap}>
@@ -78,6 +83,19 @@ export function RootNavigator() {
           component={PrivacyScreen}
           options={{
             title: privacyLabel ?? '',
+            ...stackChromeOptions({
+              allowGlass,
+              isDark,
+              colors,
+              platform: Platform.OS,
+            }),
+          }}
+        />
+        <Stack.Screen
+          name="Reservations"
+          component={ReservationsScreen}
+          options={{
+            title: reservationsLabel ?? '',
             ...stackChromeOptions({
               allowGlass,
               isDark,

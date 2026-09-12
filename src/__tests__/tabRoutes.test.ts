@@ -1,5 +1,9 @@
 import {parseCmsBootstrap} from '../cms/bootstrap';
-import {privacyTabLabel, toTabRoutes} from '../navigation/routes';
+import {
+  privacyTabLabel,
+  reservationsNavLabel,
+  toTabRoutes,
+} from '../navigation/routes';
 
 const navigationItems = [
   {
@@ -31,6 +35,7 @@ describe('navigation tab routes', () => {
       {name: 'Menu', label: 'Menú', path: '/menu'},
     ]);
     expect(privacyTabLabel(navigation)).toBe('Privacidad');
+    expect(reservationsNavLabel(navigation)).toBe('Reservar');
   });
 
   it('forwards CMS icon keys onto tab routes', () => {

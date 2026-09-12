@@ -23,6 +23,7 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Tabs: NavigatorScreenParams<MainTabParamList> | undefined;
   Privacy: undefined;
+  Reservations: undefined;
 };
 
 export function toTabRoutes(navigation: CmsNavigation): TabRoute[] {
@@ -42,11 +43,21 @@ export function toTabRoutes(navigation: CmsNavigation): TabRoute[] {
 }
 
 export function privacyTabLabel(navigation: CmsNavigation): string | undefined {
+  return labelForInternalPath(navigation, '/legal/privacy_policy');
+}
+
+export function reservationsNavLabel(
+  navigation: CmsNavigation,
+): string | undefined {
+  return labelForInternalPath(navigation, '/reservas');
+}
+
+function labelForInternalPath(
+  navigation: CmsNavigation,
+  path: '/reservas' | '/legal/privacy_policy',
+): string | undefined {
   for (const item of navigation.items) {
-    if (
-      item.destination.kind === 'internal' &&
-      item.destination.path === '/legal/privacy_policy'
-    ) {
+    if (item.destination.kind === 'internal' && item.destination.path === path) {
       return item.label;
     }
   }

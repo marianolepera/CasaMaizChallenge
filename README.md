@@ -128,7 +128,7 @@ Home and Menu render `data.layout` through `src/blocks/registry.ts`. Adding a do
 
 Bootstrap drives tabs, top-bar alerts, kitchen/operational notice, recommended or required app update, and Home promotions when `enable_new_home` is on. Missing optional bootstrap fields leave the app usable.
 
-Privacy loads `GET /api/content/v1/legal/privacy_policy`. Reservations (`/reservas`) shows a local alert because no reservation API is documented.
+Privacy loads `GET /api/content/v1/legal/privacy_policy`. Reservations (`/reservas`) opens a local placeholder screen (no reservation API is documented).
 
 ### OpenAPI types vs Zod
 
@@ -174,7 +174,7 @@ Intentionally **not** used: Expo, NativeWind, FlashList, LegendList, Reanimated,
 
 - **Page `ScrollView` vs a virtualized feed.** Live layouts are a handful of blocks. A FlashList of mixed `blockType`s would add a dependency the assessment asked us not to default to, without changing first paint.
 - **App version is the binary semver we ship (`1.0.0`), not a live store lookup.** That matches the required query format.
-- **Reservations is an alert, not a fake booking flow.** No transaction API exists; inventing one would look like product work the CMS cannot back.
+- **Reservations is a placeholder screen, not a fake booking flow.** No transaction API exists; inventing one would look like product work the CMS cannot back.
 - **Feature flags are capability keys, not copy.** `enable_new_home` shows Home promotions once: the page `promoRail` if the layout has it, otherwise `bootstrap.promotions`. The same title/id is not rendered twice. Flag off hides both. `show_store_locator_banner` only renders if the CMS also sends locator copy.
 
 ## Known limitations and next
@@ -183,9 +183,8 @@ What a reviewer can already observe: contextual requests, CMS-driven Home/Menu, 
 
 What I would do next, in order:
 
-1. Reviewer screenshots or a short recording from **both** platforms (Android Maestro goldens live under `e2e/maestro/goldens/android/`; iOS Maestro is blocked on Xcode 26.6 / [Maestro #3137](https://github.com/mobile-dev-inc/maestro/issues/3137)).
-2. A dedicated Reservations placeholder screen instead of an alert.
-3. Alert `frequency.type` (`always` / `once` / `session`) beyond cooldown + persisted dismiss.
+1. Reviewer screenshots in `docs/screenshots/` (iOS + Android: Home, Menu, Privacy). Maestro goldens remain under `e2e/maestro/goldens/` — see [e2e/maestro/README.md](e2e/maestro/README.md).
+2. Alert `frequency.type` (`always` / `once` / `session`) beyond cooldown + persisted dismiss.
 
 With more time: crash/content telemetry, release-build profiling ([notes](docs/performance.md)), and a required-update store URL only if the CMS provides one.
 

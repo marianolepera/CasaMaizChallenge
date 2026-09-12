@@ -4,7 +4,7 @@ import type {RootStackParamList} from './routes';
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
 export function navigateToInternalPath(
-  path: '/' | '/menu' | '/legal/privacy_policy',
+  path: '/' | '/menu' | '/reservas' | '/legal/privacy_policy',
 ): void {
   if (!navigationRef.isReady()) {
     return;
@@ -17,6 +17,11 @@ export function navigateToInternalPath(
 
   if (path === '/menu') {
     navigationRef.navigate('Tabs', {screen: 'Menu'});
+    return;
+  }
+
+  if (path === '/reservas') {
+    navigationRef.navigate('Reservations');
     return;
   }
 

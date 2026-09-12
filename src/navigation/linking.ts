@@ -30,17 +30,13 @@ export const appLinking: LinkingOptions<RootStackParamList> = {
         },
       },
       Privacy: 'legal/privacy_policy',
+      Reservations: 'reservas',
     },
   },
   getStateFromPath(path, options) {
     const destination = destinationFromLinkingPath(path);
 
     if (destination.kind !== 'internal') {
-      handleResolvedDestination(destination);
-      return undefined;
-    }
-
-    if (destination.path === '/reservas') {
       handleResolvedDestination(destination);
       return undefined;
     }
