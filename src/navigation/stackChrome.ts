@@ -5,15 +5,18 @@ export function stackChromeOptions({
   allowGlass,
   isDark,
   colors,
+  platform,
 }: {
   allowGlass: boolean;
   isDark: boolean;
   colors: ThemeColors;
+  platform: string;
 }): NativeStackNavigationOptions {
   const shared: NativeStackNavigationOptions = {
     headerTintColor: colors.accent,
     headerTitleStyle: {color: colors.text},
     headerBackButtonDisplayMode: 'minimal',
+    headerTitleAlign: platform === 'android' ? 'left' : 'center',
     contentStyle: {backgroundColor: colors.background},
   };
 

@@ -1,5 +1,5 @@
-import {StyleSheet, View} from 'react-native';
-import {useTheme} from '../../theme';
+import {Platform, StyleSheet, View} from 'react-native';
+import {platformSurfaceStyle, useTheme} from '../../theme';
 import {Button} from '../atoms/Button';
 import {Text} from '../atoms/Text';
 
@@ -39,9 +39,8 @@ export function CmsAlertBanner({
       accessibilityLabel={accessibilityLabel}
       style={[
         styles.container,
+        platformSurfaceStyle(Platform.OS, colors, 'banner'),
         {
-          backgroundColor: colors.surfaceMuted,
-          borderColor: colors.border,
           borderRadius: radius.md,
           marginHorizontal: spacing.md,
           marginBottom: spacing.sm,
@@ -81,7 +80,6 @@ export function CmsAlertBanner({
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
     borderCurve: 'continuous',
   },
 });

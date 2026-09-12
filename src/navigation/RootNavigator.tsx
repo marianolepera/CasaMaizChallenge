@@ -1,4 +1,5 @@
 import type {ComponentType, ReactNode} from 'react';
+import {Platform} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ErrorState} from '../components/molecules/ErrorState';
@@ -77,7 +78,12 @@ export function RootNavigator() {
           component={PrivacyScreen}
           options={{
             title: privacyLabel ?? '',
-            ...stackChromeOptions({allowGlass, isDark, colors}),
+            ...stackChromeOptions({
+              allowGlass,
+              isDark,
+              colors,
+              platform: Platform.OS,
+            }),
           }}
         />
       </Stack.Navigator>
@@ -114,7 +120,12 @@ function MainTabs({routes}: {routes: TabRoute[]}) {
         headerShown: false,
         tabBarActiveTintColor: colors.accent,
         tabBarInactiveTintColor: colors.textMuted,
-        tabBarStyle: tabChromeStyle({allowGlass, colors, minTouchTarget}),
+        tabBarStyle: tabChromeStyle({
+          allowGlass,
+          platform: Platform.OS,
+          colors,
+          minTouchTarget,
+        }),
         tabBarItemStyle: {minHeight: minTouchTarget},
       }}>
       {routes.map(route => (

@@ -3,10 +3,12 @@ import {
   AccessibilityInfo,
   Animated,
   Easing,
+  Platform,
   Pressable,
   StyleSheet,
   View,
 } from 'react-native';
+import {androidRippleColor, pressOpacity} from './pressFeedback';
 import {useTheme} from './ThemeProvider';
 
 const TRACK_WIDTH = 56;
@@ -23,6 +25,7 @@ const NIGHT_TRACK = '#2A2420';
 
 export function AppearanceControl() {
   const {colors, isDark, minTouchTarget, setPreference} = useTheme();
+  const ripple = androidRippleColor(Platform.OS, colors.overlay);
   const progress = useRef(new Animated.Value(isDark ? 1 : 0)).current;
   const [reduceMotion, setReduceMotion] = useState(false);
   const isFirstRender = useRef(true);
@@ -84,12 +87,17 @@ export function AppearanceControl() {
       accessibilityLabel="Modo oscuro"
       accessibilityState={{checked: isDark}}
       onPress={() => setPreference(isDark ? 'light' : 'dark')}
+      android_ripple={
+        ripple
+          ? {...ripple, borderless: true, radius: minTouchTarget / 2}
+          : undefined
+      }
       style={({pressed}) => [
         styles.hitTarget,
         {
           minHeight: minTouchTarget,
           minWidth: minTouchTarget,
-          opacity: pressed ? 0.85 : 1,
+          opacity: pressOpacity(Platform.OS, pressed),
         },
       ]}>
       <View

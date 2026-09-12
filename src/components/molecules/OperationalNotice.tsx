@@ -1,6 +1,6 @@
-import {StyleSheet, View} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import {Text} from '../atoms/Text';
-import {useTheme} from '../../theme';
+import {platformSurfaceStyle, politeStatusRole, useTheme} from '../../theme';
 
 export const OPERATIONAL_NOTICE_TEST_ID = 'cms-operational-notice';
 export const OPERATIONAL_NOTICE_MESSAGE_TEST_ID = 'cms-operational-notice-message';
@@ -15,14 +15,13 @@ export function OperationalNotice({message}: OperationalNoticeProps) {
   return (
     <View
       testID={OPERATIONAL_NOTICE_TEST_ID}
-      accessibilityRole="status"
+      accessibilityRole={politeStatusRole()}
       accessibilityLiveRegion="polite"
       accessibilityLabel={message}
       style={[
         styles.container,
+        platformSurfaceStyle(Platform.OS, colors, 'banner'),
         {
-          backgroundColor: colors.surfaceMuted,
-          borderColor: colors.border,
           borderRadius: radius.md,
           marginHorizontal: spacing.md,
           marginBottom: spacing.sm,
@@ -38,7 +37,6 @@ export function OperationalNotice({message}: OperationalNoticeProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
     borderCurve: 'continuous',
   },
 });

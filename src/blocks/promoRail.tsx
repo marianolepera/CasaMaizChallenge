@@ -1,5 +1,5 @@
 import {useCallback} from 'react';
-import {FlatList, StyleSheet, useWindowDimensions, View} from 'react-native';
+import {FlatList, Platform, StyleSheet, useWindowDimensions, View} from 'react-native';
 import {Button} from '../components/atoms/Button';
 import {Text} from '../components/atoms/Text';
 import {CmsImage} from '../components/molecules/CmsImage';
@@ -7,7 +7,7 @@ import {
   handleResolvedDestination,
   resolveDestination,
 } from '../navigation/destinations';
-import {useTheme} from '../theme';
+import {platformSurfaceStyle, useTheme} from '../theme';
 import {readArray, readObject, readString} from './fields';
 import type {BlockProps} from './types';
 
@@ -19,6 +19,7 @@ export function PromoRail({block}: BlockProps) {
     .map(readObject)
     .filter((item): item is Record<string, unknown> => Boolean(item));
   const cardWidth = Math.min(width * 0.82, 340);
+  const cardSurface = platformSurfaceStyle(Platform.OS, colors, 'card');
 
   const renderItem = useCallback(
     ({item}: {item: Record<string, unknown>}) => {
@@ -33,12 +34,11 @@ export function PromoRail({block}: BlockProps) {
         <View
           style={[
             styles.card,
+            cardSurface,
             {
               width: cardWidth,
               marginRight: spacing.sm,
-              backgroundColor: colors.surface,
               borderRadius: radius.md,
-              borderColor: colors.border,
             },
           ]}>
           <CmsImage media={item.mobileImage ?? item.desktopImage} />
@@ -68,14 +68,7 @@ export function PromoRail({block}: BlockProps) {
         </View>
       );
     },
-    [
-      cardWidth,
-      colors.border,
-      colors.surface,
-      radius.md,
-      spacing.sm,
-      spacing.xs,
-    ],
+    [cardSurface, cardWidth, radius.md, spacing.sm, spacing.xs],
   );
 
   return (
@@ -107,6 +100,5 @@ export function PromoRail({block}: BlockProps) {
 const styles = StyleSheet.create({
   card: {
     overflow: 'hidden',
-    borderWidth: 1,
   },
 });

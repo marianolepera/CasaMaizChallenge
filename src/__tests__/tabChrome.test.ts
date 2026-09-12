@@ -7,6 +7,7 @@ describe('tab chrome', () => {
     expect(
       tabChromeStyle({
         allowGlass: true,
+        platform: 'ios',
         colors: lightColors,
         minTouchTarget: 44,
       }),
@@ -23,12 +24,29 @@ describe('tab chrome', () => {
     expect(
       tabChromeStyle({
         allowGlass: false,
+        platform: 'ios',
         colors: lightColors,
         minTouchTarget: 44,
       }),
     ).toEqual({
       backgroundColor: lightColors.surface,
       borderTopColor: lightColors.border,
+      minHeight: 44,
+    });
+  });
+
+  it('uses Material elevation on Android instead of a hairline', () => {
+    expect(
+      tabChromeStyle({
+        allowGlass: false,
+        platform: 'android',
+        colors: lightColors,
+        minTouchTarget: 44,
+      }),
+    ).toEqual({
+      backgroundColor: lightColors.surface,
+      borderTopWidth: 0,
+      elevation: 4,
       minHeight: 44,
     });
   });

@@ -8,6 +8,7 @@ describe('stack chrome', () => {
         allowGlass: true,
         isDark: false,
         colors: lightColors,
+        platform: 'ios',
       }),
     ).toMatchObject({
       headerTransparent: true,
@@ -29,6 +30,7 @@ describe('stack chrome', () => {
         allowGlass: true,
         isDark: true,
         colors: darkColors,
+        platform: 'ios',
       }).headerBlurEffect,
     ).toBe('systemChromeMaterialDark');
   });
@@ -38,11 +40,24 @@ describe('stack chrome', () => {
       allowGlass: false,
       isDark: false,
       colors: lightColors,
+      platform: 'ios',
     });
 
     expect(options.headerTransparent).toBe(false);
     expect(options.headerBlurEffect).toBeUndefined();
+    expect(options.headerTitleAlign).toBe('center');
     expect(options.headerStyle).toEqual({backgroundColor: lightColors.surface});
     expect(options.headerTintColor).toBe(lightColors.accent);
+  });
+
+  it('left-aligns the Android privacy header', () => {
+    expect(
+      stackChromeOptions({
+        allowGlass: false,
+        isDark: false,
+        colors: lightColors,
+        platform: 'android',
+      }).headerTitleAlign,
+    ).toBe('left');
   });
 });

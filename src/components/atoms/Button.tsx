@@ -1,12 +1,13 @@
 import {useMemo} from 'react';
 import {
+  Platform,
   Pressable,
   StyleSheet,
   type PressableProps,
   type StyleProp,
   type ViewStyle,
 } from 'react-native';
-import {useTheme} from '../../theme';
+import {androidRippleColor, pressOpacity, useTheme} from '../../theme';
 import {Text} from './Text';
 
 export type ButtonVariant = 'primary' | 'secondary';
@@ -47,7 +48,7 @@ export function Button({
       accessibilityLabel={label}
       accessibilityState={{disabled: Boolean(disabled)}}
       disabled={disabled}
-      android_ripple={{color: colors.overlay}}
+      android_ripple={androidRippleColor(Platform.OS, colors.overlay)}
       style={({pressed}) => [
         styles.base,
         {
@@ -56,7 +57,7 @@ export function Button({
           borderRadius: radius.md,
           backgroundColor: palette.background,
           borderColor: palette.border,
-          opacity: disabled ? 0.5 : pressed ? 0.85 : 1,
+          opacity: pressOpacity(Platform.OS, pressed, Boolean(disabled)),
         },
         style,
       ]}>
@@ -72,5 +73,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
+    overflow: 'hidden',
   },
 });

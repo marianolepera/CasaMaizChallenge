@@ -1,5 +1,5 @@
-import {StyleSheet, View} from 'react-native';
-import {useTheme} from '../../theme';
+import {Platform, StyleSheet, View} from 'react-native';
+import {platformSurfaceStyle, politeStatusRole, useTheme} from '../../theme';
 import {Button} from '../atoms/Button';
 import {Text} from '../atoms/Text';
 
@@ -19,14 +19,13 @@ export function AppUpdateNotice({message, onDismiss}: AppUpdateNoticeProps) {
   return (
     <View
       testID={APP_UPDATE_TEST_ID}
-      accessibilityRole="status"
+      accessibilityRole={politeStatusRole()}
       accessibilityLiveRegion="polite"
       accessibilityLabel={message}
       style={[
         styles.container,
+        platformSurfaceStyle(Platform.OS, colors, 'banner'),
         {
-          backgroundColor: colors.surfaceMuted,
-          borderColor: colors.border,
           borderRadius: radius.md,
           marginHorizontal: spacing.md,
           marginBottom: spacing.sm,
@@ -49,7 +48,6 @@ export function AppUpdateNotice({message, onDismiss}: AppUpdateNoticeProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth: 1,
     borderCurve: 'continuous',
   },
 });

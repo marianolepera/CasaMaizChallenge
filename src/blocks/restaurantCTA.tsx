@@ -1,11 +1,11 @@
-import {View} from 'react-native';
+import {Platform, View} from 'react-native';
 import {Button} from '../components/atoms/Button';
 import {Text} from '../components/atoms/Text';
 import {
   handleResolvedDestination,
   resolveDestination,
 } from '../navigation/destinations';
-import {useTheme} from '../theme';
+import {platformSurfaceStyle, useTheme} from '../theme';
 import {readString} from './fields';
 import type {BlockProps} from './types';
 
@@ -23,8 +23,8 @@ export function RestaurantCTA({block}: BlockProps) {
         marginHorizontal: spacing.md,
         padding: spacing.lg,
         gap: spacing.sm,
-        backgroundColor: colors.surfaceMuted,
         borderRadius: radius.lg,
+        ...platformSurfaceStyle(Platform.OS, colors, 'banner'),
       }}>
       {headline ? (
         <Text variant="heading" accessibilityRole="header">
