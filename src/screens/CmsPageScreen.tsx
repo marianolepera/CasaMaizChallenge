@@ -5,6 +5,7 @@ import {PageLayout} from '../blocks/PageLayout';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
 import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Text} from '../components/atoms/Text';
 import type {PageSlug} from '../cms/contentClient';
@@ -32,7 +33,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
 
   if (loading && !page) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar}>
+      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
         <LoadingState />
       </ScreenFrame>
     );
@@ -40,7 +41,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
 
   if (error && !page) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar}>
+      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
         <ErrorState message={error.userMessage} onRetry={reload} />
       </ScreenFrame>
     );
@@ -48,7 +49,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
 
   if (!page || page.layout.length === 0) {
     return (
-      <ScreenFrame testID={testID} toolbar={toolbar}>
+      <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
         <ScrollView
           contentContainerStyle={styles.flexGrow}
           refreshControl={refreshControl}>
@@ -59,7 +60,7 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
   }
 
   return (
-    <ScreenFrame testID={testID} toolbar={toolbar}>
+    <ScreenFrame testID={testID} toolbar={toolbar} pageSlug={slug}>
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       <ScrollView
         refreshControl={refreshControl}
@@ -81,10 +82,12 @@ export function CmsPageScreen({slug, testID, toolbar}: CmsPageScreenProps) {
 function ScreenFrame({
   testID,
   toolbar,
+  pageSlug,
   children,
 }: {
   testID: string;
   toolbar?: ReactNode;
+  pageSlug: string;
   children: ReactNode;
 }) {
   const {colors, spacing} = useTheme();
@@ -104,6 +107,7 @@ function ScreenFrame({
           {toolbar}
         </View>
       ) : null}
+      <CmsScreenBanners pageSlug={pageSlug} />
       {children}
     </SafeAreaView>
   );

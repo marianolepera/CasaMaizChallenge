@@ -1,7 +1,10 @@
 import {SUPPORTED_CONTRACT_VERSION} from '../cms/contract';
 import {
+  getOperationalNoticeMessage,
   hasUsableNavigation,
+  isFeatureEnabled,
   parseCmsBootstrap,
+  shouldRenderFeature,
 } from '../cms/bootstrap';
 import {createContentRepository} from '../repository/contentRepository';
 import {createMemoryStore} from '../repository/memoryStorage';
@@ -90,6 +93,12 @@ describe('CMS bootstrap navigation', () => {
         .items,
     ).toEqual([]);
     expect(hasUsableNavigation(parseCmsBootstrap({}).navigation)).toBe(false);
+    expect(parseCmsBootstrap(null)).toEqual({
+      navigation: {items: []},
+      featureFlags: {},
+      alerts: [],
+      promotions: [],
+    });
   });
 
   it('falls back to experience.navigation when top-level navigation is absent', () => {
@@ -129,19 +138,15 @@ describe('CMS bootstrap navigation', () => {
     expect(hasUsableNavigation(bootstrap.navigation)).toBe(true);
   });
 
-  it('tolerates extra bootstrap fields used by later slices', () => {
+  it('parses product fields and ignores unknown extras', () => {
     const bootstrap = parseCmsBootstrap({
       navigation: {items: navigationItems},
-      featureFlags: {enable_new_home: true},
-      editorialNote: 'keep me',
+      featureFlags: {enable_new_home: true, junk: 'nope'},
+      editorialNote: 'ignore me',
     });
 
-    expect(bootstrap).toEqual(
-      expect.objectContaining({
-        featureFlags: {enable_new_home: true},
-        editorialNote: 'keep me',
-      }),
-    );
+    expect(bootstrap.featureFlags).toEqual({enable_new_home: true});
+    expect(bootstrap).not.toHaveProperty('editorialNote');
   });
 
   it('can read a cached bootstrap envelope and still parse navigation', async () => {
@@ -174,5 +179,177 @@ describe('CMS bootstrap navigation', () => {
     expect(parseCmsBootstrap(cached.envelope.data).navigation.items[0].label).toBe(
       'Inicio',
     );
+  });
+});
+
+describe('CMS bootstrap product fields', () => {
+  it('keeps boolean flags and drops non-boolean values', () => {
+    const bootstrap = parseCmsBootstrap({
+      featureFlags: {
+        enable_new_home: true,
+        show_rewards_module: false,
+        show_reorder: false,
+        show_store_locator_banner: true,
+        junk: 'nope',
+      },
+    });
+
+    expect(bootstrap.featureFlags).toEqual({
+      enable_new_home: true,
+      show_rewards_module: false,
+      show_reorder: false,
+      show_store_locator_banner: true,
+    });
+  });
+
+  it('does not treat missing or false flags as enabled', () => {
+    const flags = parseCmsBootstrap({
+      featureFlags: {
+        enable_new_home: true,
+        show_rewards_module: false,
+        show_reorder: false,
+        show_store_locator_banner: true,
+      },
+    }).featureFlags;
+
+    expect(isFeatureEnabled(flags, 'enable_new_home')).toBe(true);
+    expect(isFeatureEnabled(flags, 'show_rewards_module')).toBe(false);
+    expect(isFeatureEnabled(flags, 'show_reorder')).toBe(false);
+    expect(isFeatureEnabled(flags, 'not_in_payload')).toBe(false);
+    expect(isFeatureEnabled(undefined, 'enable_new_home')).toBe(false);
+    expect(isFeatureEnabled({}, 'enable_new_home')).toBe(false);
+  });
+
+  it('does not invent feature UI when the CMS has no copy', () => {
+    const flags = parseCmsBootstrap({
+      featureFlags: {show_store_locator_banner: true},
+    }).featureFlags;
+
+    expect(shouldRenderFeature(flags, 'show_store_locator_banner', false)).toBe(
+      false,
+    );
+    expect(shouldRenderFeature(flags, 'show_store_locator_banner', true)).toBe(
+      true,
+    );
+    expect(shouldRenderFeature(flags, 'show_rewards_module', true)).toBe(false);
+  });
+
+  it('parses a CMS alert and skips incomplete alerts or actions', () => {
+    const bootstrap = parseCmsBootstrap({
+      alerts: [
+        {id: 'no-copy'},
+        {
+          id: '6a5a9603de94bce2344e60ed',
+          title: 'Aviso de cierre',
+          message: 'Hoy tenemos un compromiso de aviso de cierre',
+          placement: 'topBar',
+          dismissible: true,
+          priority: 100,
+          pageSlugs: [],
+          frequency: {type: 'always', cooldownHours: 24},
+          trigger: {type: 'load', delayMs: 3000, scrollPercent: 30},
+          actions: [
+            {label: 'Ir a google', href: '/legal/privacy_policy'},
+            {href: '/menu'},
+            {label: 'Ir a menú', href: '/menu'},
+          ],
+        },
+      ],
+    });
+
+    expect(bootstrap.alerts).toEqual([
+      {
+        id: '6a5a9603de94bce2344e60ed',
+        title: 'Aviso de cierre',
+        message: 'Hoy tenemos un compromiso de aviso de cierre',
+        placement: 'topBar',
+        dismissible: true,
+        priority: 100,
+        pageSlugs: [],
+        frequency: {type: 'always', cooldownHours: 24},
+        trigger: {type: 'load', delayMs: 3000, scrollPercent: 30},
+        actions: [
+          {
+            label: 'Ir a google',
+            destination: {kind: 'internal', path: '/legal/privacy_policy'},
+          },
+          {
+            label: 'Ir a menú',
+            destination: {kind: 'internal', path: '/menu'},
+          },
+        ],
+      },
+    ]);
+  });
+
+  it('parses operational notice and recommended app update', () => {
+    const bootstrap = parseCmsBootstrap({
+      operationalControls: {
+        mode: 'notice',
+        bannerMessage: 'Hoy cerramos cocina a las 22:30.',
+        appUpdate: {
+          policy: 'recommended',
+          minimumVersion: '1.5.0',
+          recommendedVersion: '2.4.0',
+          message: 'Actualiza para disfrutar el nuevo menú y reservas.',
+        },
+      },
+    });
+
+    expect(bootstrap.operationalControls).toEqual({
+      mode: 'notice',
+      bannerMessage: 'Hoy cerramos cocina a las 22:30.',
+      appUpdate: {
+        policy: 'recommended',
+        minimumVersion: '1.5.0',
+        recommendedVersion: '2.4.0',
+        message: 'Actualiza para disfrutar el nuevo menú y reservas.',
+      },
+    });
+    expect(parseCmsBootstrap({operationalControls: {}}).operationalControls).toBeUndefined();
+    expect(
+      getOperationalNoticeMessage(
+        parseCmsBootstrap({
+          operationalControls: {
+            mode: 'notice',
+            bannerMessage: 'Hoy cerramos cocina a las 22:30.',
+          },
+        }).operationalControls,
+      ),
+    ).toBe('Hoy cerramos cocina a las 22:30.');
+    expect(getOperationalNoticeMessage(undefined)).toBeUndefined();
+  });
+
+  it('parses bootstrap promotions and skips entries without a title', () => {
+    const bootstrap = parseCmsBootstrap({
+      promotions: [
+        {description: 'sin título'},
+        {
+          id: 'promo-1',
+          title: 'Martes de sobremesa',
+          eyebrow: 'Solo por temporada',
+          description: 'Postre de maíz azul de cortesía en cenas de los martes.',
+          placement: 'home',
+          priority: 10,
+          cta: {
+            label: 'Reservar',
+            destination: {path: '/reservas'},
+          },
+        },
+      ],
+    });
+
+    expect(bootstrap.promotions).toEqual([
+      {
+        id: 'promo-1',
+        title: 'Martes de sobremesa',
+        eyebrow: 'Solo por temporada',
+        description: 'Postre de maíz azul de cortesía en cenas de los martes.',
+        placement: 'home',
+        priority: 10,
+        ctaLabel: 'Reservar',
+        destination: {kind: 'internal', path: '/reservas'},
+      },
+    ]);
   });
 });

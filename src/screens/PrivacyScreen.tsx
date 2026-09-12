@@ -1,8 +1,10 @@
+import type {ReactNode} from 'react';
 import {RefreshControl, ScrollView, StyleSheet, View} from 'react-native';
 import {SafeAreaView} from 'react-native-safe-area-context';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
 import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Text} from '../components/atoms/Text';
 import {useCmsLegal} from '../hooks/useCmsLegal';
@@ -27,23 +29,17 @@ export function PrivacyScreen() {
 
   if (loading && !document) {
     return (
-      <SafeAreaView
-        edges={['bottom']}
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID="privacy-screen">
+      <ScreenFrame>
         <LoadingState />
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
   if (error && !document) {
     return (
-      <SafeAreaView
-        edges={['bottom']}
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID="privacy-screen">
+      <ScreenFrame>
         <ErrorState message={error.userMessage} onRetry={reload} />
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
@@ -53,24 +49,18 @@ export function PrivacyScreen() {
 
   if (!document || !hasContent) {
     return (
-      <SafeAreaView
-        edges={['bottom']}
-        style={[styles.safe, {backgroundColor: colors.background}]}
-        testID="privacy-screen">
+      <ScreenFrame>
         <ScrollView
           contentContainerStyle={styles.flexGrow}
           refreshControl={refreshControl}>
           <EmptyState />
         </ScrollView>
-      </SafeAreaView>
+      </ScreenFrame>
     );
   }
 
   return (
-    <SafeAreaView
-      edges={['bottom']}
-      style={[styles.safe, {backgroundColor: colors.background}]}
-      testID="privacy-screen">
+    <ScreenFrame>
       {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       <ScrollView
         refreshControl={refreshControl}
@@ -98,6 +88,20 @@ export function PrivacyScreen() {
           </View>
         ) : null}
       </ScrollView>
+    </ScreenFrame>
+  );
+}
+
+function ScreenFrame({children}: {children: ReactNode}) {
+  const {colors} = useTheme();
+
+  return (
+    <SafeAreaView
+      edges={['bottom']}
+      style={[styles.safe, {backgroundColor: colors.background}]}
+      testID="privacy-screen">
+      <CmsScreenBanners pageSlug="privacy_policy" />
+      {children}
     </SafeAreaView>
   );
 }

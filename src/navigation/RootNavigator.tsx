@@ -1,9 +1,14 @@
-import type {ComponentType} from 'react';
+import type {ComponentType, ReactNode} from 'react';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {AppUpdateProvider} from '../cms/AppUpdateProvider';
+import {CmsAlertProvider} from '../cms/CmsAlertProvider';
+import {CmsBootstrapProvider} from '../cms/CmsBootstrapProvider';
+import type {CmsBootstrap} from '../cms/bootstrap';
 import {useCmsBootstrap} from '../hooks/useCmsBootstrap';
+import {AppUpdateGate} from '../screens/AppUpdateScreen';
 import {HomeScreen} from '../screens/HomeScreen';
 import {MenuScreen} from '../screens/MenuScreen';
 import {PrivacyScreen} from '../screens/PrivacyScreen';
@@ -40,7 +45,11 @@ export function RootNavigator() {
 
   const tabRoutes = bootstrap ? toTabRoutes(bootstrap.navigation) : [];
   if (tabRoutes.length === 0) {
-    return <HomeScreen />;
+    return (
+      <BootstrappedApp bootstrap={bootstrap}>
+        <HomeScreen />
+      </BootstrappedApp>
+    );
   }
 
   const privacyLabel = bootstrap
@@ -48,22 +57,42 @@ export function RootNavigator() {
     : undefined;
 
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerTintColor: colors.accent,
-        headerStyle: {backgroundColor: colors.surface},
-        headerTitleStyle: {color: colors.text},
-        contentStyle: {backgroundColor: colors.background},
-      }}>
-      <Stack.Screen name="Tabs" options={{headerShown: false}}>
-        {() => <MainTabs routes={tabRoutes} />}
-      </Stack.Screen>
-      <Stack.Screen
-        name="Privacy"
-        component={PrivacyScreen}
-        options={{title: privacyLabel ?? ''}}
-      />
-    </Stack.Navigator>
+    <BootstrappedApp bootstrap={bootstrap}>
+      <Stack.Navigator
+        screenOptions={{
+          headerTintColor: colors.accent,
+          headerStyle: {backgroundColor: colors.surface},
+          headerTitleStyle: {color: colors.text},
+          contentStyle: {backgroundColor: colors.background},
+        }}>
+        <Stack.Screen name="Tabs" options={{headerShown: false}}>
+          {() => <MainTabs routes={tabRoutes} />}
+        </Stack.Screen>
+        <Stack.Screen
+          name="Privacy"
+          component={PrivacyScreen}
+          options={{title: privacyLabel ?? ''}}
+        />
+      </Stack.Navigator>
+    </BootstrappedApp>
+  );
+}
+
+function BootstrappedApp({
+  bootstrap,
+  children,
+}: {
+  bootstrap: CmsBootstrap | null;
+  children: ReactNode;
+}) {
+  return (
+    <CmsBootstrapProvider bootstrap={bootstrap}>
+      <AppUpdateProvider update={bootstrap?.operationalControls?.appUpdate}>
+        <AppUpdateGate>
+          <CmsAlertProvider>{children}</CmsAlertProvider>
+        </AppUpdateGate>
+      </AppUpdateProvider>
+    </CmsBootstrapProvider>
   );
 }
 
