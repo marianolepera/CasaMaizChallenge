@@ -5,12 +5,15 @@ import {PageLayout} from '../blocks/PageLayout';
 import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {HomeBootstrapFeatures} from '../components/molecules/BootstrapPromotions';
 import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
 import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Input} from '../components/atoms/Input';
 import {SearchIcon} from '../components/atoms/SearchIcon';
 import {Text} from '../components/atoms/Text';
+import {useBootstrap} from '../cms/CmsBootstrapProvider';
 import type {PageSlug} from '../cms/contentClient';
+import {applyHomeFeatureFlags} from '../cms/featureFlags';
 import {filterLayoutByQuery} from '../cms/menuFilter';
 import {useCmsPage} from '../hooks/useCmsPage';
 import {useGlassChrome} from '../hooks/useGlassChrome';
@@ -40,9 +43,15 @@ export function CmsPageScreen({
     : 0;
   const {page, error, loading, refreshing, source, reload, refresh} =
     useCmsPage(slug);
+  const bootstrap = useBootstrap();
   const [query, setQuery] = useState('');
+  const pageLayout = page
+    ? slug === 'home'
+      ? applyHomeFeatureFlags(page.layout, bootstrap?.featureFlags)
+      : page.layout
+    : [];
   const visibleLayout = page
-    ? filterLayoutByQuery(page.layout, searchable ? query : '')
+    ? filterLayoutByQuery(pageLayout, searchable ? query : '')
     : [];
   const searchField = searchable ? (
     <View
@@ -119,6 +128,9 @@ export function CmsPageScreen({
           automaticallyAdjustKeyboardInsets
           contentContainerStyle={[styles.flexGrow, {paddingBottom: overlayInset}]}
           refreshControl={refreshControl}>
+          {slug === 'home' ? (
+            <HomeBootstrapFeatures layout={pageLayout} />
+          ) : null}
           <EmptyState />
         </ScrollView>
       </ScreenFrame>
@@ -139,6 +151,7 @@ export function CmsPageScreen({
         automaticallyAdjustKeyboardInsets
         refreshControl={refreshControl}
         contentContainerStyle={{paddingBottom: spacing.xl + overlayInset}}>
+        {slug === 'home' ? <HomeBootstrapFeatures layout={pageLayout} /> : null}
         {page.title ? (
           <View
             style={{paddingHorizontal: spacing.md, paddingBottom: spacing.sm}}>

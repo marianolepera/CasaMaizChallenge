@@ -53,6 +53,15 @@ export {
   shouldRenderFeature,
   getOperationalNoticeMessage,
 } from './bootstrap';
+export {
+  FEATURE_NEW_HOME,
+  FEATURE_STORE_LOCATOR_BANNER,
+  isHomePlacement,
+  isStoreLocatorPlacement,
+  applyHomeFeatureFlags,
+  selectHomePromotions,
+  selectStoreLocatorPromotions,
+} from './featureFlags';
 export type {
   CmsAlert,
   CmsAlertAction,

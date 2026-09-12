@@ -13,6 +13,7 @@ import {navigationRef} from '../navigation/navigationRef';
 import {createContentRepository} from '../repository/contentRepository';
 import {ContentRepositoryProvider} from '../repository/ContentRepositoryProvider';
 import {createMemoryStore} from '../repository/memoryStorage';
+import {HOME_PROMOTIONS_TEST_ID} from '../components/molecules/BootstrapPromotions';
 import {OPERATIONAL_NOTICE_MESSAGE_TEST_ID} from '../components/molecules/OperationalNotice';
 import {
   APP_UPDATE_DISMISS_TEST_ID,
@@ -154,6 +155,84 @@ describe('RootNavigator', () => {
     await flush();
 
     expect(tree.root.findByProps({testID: 'cms-error-state'})).toBeTruthy();
+  });
+
+  it('shows bootstrap home promotions when enable_new_home is on', async () => {
+    tree = renderRoot(
+      mockClient({
+        getBootstrap: jest.fn().mockResolvedValue(
+          bootstrapEnvelope(
+            [
+              {label: 'Inicio', destination: {path: '/'}},
+              {label: 'Menú', destination: {path: '/menu'}},
+            ],
+            {
+              featureFlags: {enable_new_home: true},
+              promotions: [
+                {
+                  title: 'Martes de sobremesa',
+                  placement: 'home',
+                  cta: {label: 'Reservar', destination: {path: '/reservas'}},
+                },
+              ],
+            },
+          ),
+        ) as CmsClient['getBootstrap'],
+      }),
+    );
+
+    await flush();
+
+    expect(tree.root.findByProps({testID: HOME_PROMOTIONS_TEST_ID})).toBeTruthy();
+    expect(
+      tree.root.findAllByProps({children: 'Martes de sobremesa'}).length,
+    ).toBeGreaterThan(0);
+  });
+
+  it('does not duplicate a bootstrap promo already in the home promoRail', async () => {
+    tree = renderRoot(
+      mockClient({
+        getBootstrap: jest.fn().mockResolvedValue(
+          bootstrapEnvelope(
+            [
+              {label: 'Inicio', destination: {path: '/'}},
+              {label: 'Menú', destination: {path: '/menu'}},
+            ],
+            {
+              featureFlags: {enable_new_home: true},
+              promotions: [
+                {title: 'Martes de sobremesa', placement: 'home'},
+              ],
+            },
+          ),
+        ) as CmsClient['getBootstrap'],
+        getPage: jest.fn().mockResolvedValue({
+          contractVersion: '1.1',
+          data: {
+            slug: 'home',
+            title: 'Casa Maíz',
+            layout: [
+              {
+                blockType: 'promoRail',
+                title: 'Algo especial está en la mesa',
+                promotions: [{title: 'Martes de sobremesa'}],
+              },
+            ],
+          },
+          preview: false,
+        }) as CmsClient['getPage'],
+      }),
+    );
+
+    await flush();
+
+    expect(() =>
+      tree!.root.findByProps({testID: HOME_PROMOTIONS_TEST_ID}),
+    ).toThrow();
+    expect(tree.root.findByProps({testID: 'cms-promo-rail'})).toBeTruthy();
+    expect(
+      tree.root.findAllByProps({children: 'Martes de sobremesa'}).length,
+    ).toBeGreaterThan(0);
   });
 
   it('shows the CMS operational notice when bootstrap has a banner', async () => {

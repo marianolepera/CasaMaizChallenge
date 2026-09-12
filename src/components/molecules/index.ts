@@ -36,3 +36,8 @@ export {
   CMS_ALERT_TITLE_TEST_ID,
 } from './CmsAlertBanner';
 export {CmsScreenBanners} from './CmsScreenBanners';
+export {HomeBootstrapFeatures} from './BootstrapPromotions';
+export {
+  HOME_PROMOTIONS_TEST_ID,
+  STORE_LOCATOR_TEST_ID,
+} from './BootstrapPromotions';
