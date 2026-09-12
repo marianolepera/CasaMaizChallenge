@@ -82,6 +82,10 @@ You've successfully run and modified your React Native App. :partying_face:
 - If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
 - If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
 
+# Performance
+
+Notes from the current architecture (lists, prefetch, cache, Reduce Motion) and how to profile on a device: [docs/performance.md](docs/performance.md). There are no checked-in FPS or Systrace captures — measure with the [React Native profiling guide](https://reactnative.dev/docs/profiling) on a release build.
+
 # Visual regression
 
 iOS Simulator only. Install [Maestro](https://docs.maestro.dev/maestro-cli/how-to-install-maestro-cli), boot the same device used for the goldens, run `npm start` and `npm run ios`, then:
