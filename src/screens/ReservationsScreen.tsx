@@ -11,7 +11,6 @@ import {useTheme} from '../theme';
 
 export const RESERVATIONS_SCREEN_TEST_ID = 'reservations-screen';
 
-/** Local placeholder — no reservation API is documented on the public CMS. */
 export const RESERVATIONS_PLACEHOLDER_MESSAGE =
   'Las reservas estarán disponibles pronto.';
 

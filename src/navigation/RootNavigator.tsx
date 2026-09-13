@@ -1,15 +1,18 @@
 import type {ComponentType, ReactNode} from 'react';
-import {Platform} from 'react-native';
+import {Platform, StyleSheet, View} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
+import {OfflineBanner} from '../components/molecules/OfflineBanner';
+import {ConsumeTopSafeArea} from '../components/molecules/ConsumeTopSafeArea';
 import {AppUpdateProvider} from '../cms/AppUpdateProvider';
 import {CmsAlertProvider} from '../cms/CmsAlertProvider';
 import {CmsBootstrapProvider} from '../cms/CmsBootstrapProvider';
 import type {CmsBootstrap} from '../cms/bootstrap';
 import {useCmsBootstrap} from '../hooks/useCmsBootstrap';
 import {useGlassChrome} from '../hooks/useGlassChrome';
+import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {AppUpdateGate} from '../screens/AppUpdateScreen';
 import {HomeScreen} from '../screens/HomeScreen';
 import {MenuScreen} from '../screens/MenuScreen';
@@ -38,8 +41,6 @@ const TAB_SCREENS: Record<TabRouteName, ComponentType> = {
 };
 
 export function RootNavigator() {
-  const {colors, isDark} = useTheme();
-  const {allowGlass} = useGlassChrome();
   const {bootstrap, error, loading, reload} = useCmsBootstrap();
 
   if (loading && !bootstrap) {
@@ -68,44 +69,65 @@ export function RootNavigator() {
 
   return (
     <BootstrappedApp bootstrap={bootstrap}>
-      <Stack.Navigator
-        screenOptions={{
-          headerTintColor: colors.accent,
-          headerTitleStyle: {color: colors.text},
-          headerBackButtonDisplayMode: 'minimal',
-          contentStyle: {backgroundColor: colors.background},
-        }}>
-        <Stack.Screen name="Tabs" options={{headerShown: false}}>
-          {() => <MainTabs routes={tabRoutes} />}
-        </Stack.Screen>
-        <Stack.Screen
-          name="Privacy"
-          component={PrivacyScreen}
-          options={{
-            title: privacyLabel ?? '',
-            ...stackChromeOptions({
-              allowGlass,
-              isDark,
-              colors,
-              platform: Platform.OS,
-            }),
-          }}
-        />
-        <Stack.Screen
-          name="Reservations"
-          component={ReservationsScreen}
-          options={{
-            title: reservationsLabel ?? '',
-            ...stackChromeOptions({
-              allowGlass,
-              isDark,
-              colors,
-              platform: Platform.OS,
-            }),
-          }}
-        />
-      </Stack.Navigator>
+      <AppStack
+        privacyLabel={privacyLabel}
+        reservationsLabel={reservationsLabel}
+        tabRoutes={tabRoutes}
+      />
     </BootstrappedApp>
+  );
+}
+
+function AppStack({
+  privacyLabel,
+  reservationsLabel,
+  tabRoutes,
+}: {
+  privacyLabel: string | undefined;
+  reservationsLabel: string | undefined;
+  tabRoutes: TabRoute[];
+}) {
+  const {colors, isDark} = useTheme();
+  const {allowGlass} = useGlassChrome();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTintColor: colors.accent,
+        headerTitleStyle: {color: colors.text},
+        headerBackButtonDisplayMode: 'minimal',
+        contentStyle: {backgroundColor: colors.background},
+      }}>
+      <Stack.Screen name="Tabs" options={{headerShown: false}}>
+        {() => <MainTabs routes={tabRoutes} />}
+      </Stack.Screen>
+      <Stack.Screen
+        name="Privacy"
+        component={PrivacyScreen}
+        options={{
+          title: privacyLabel ?? '',
+          ...stackChromeOptions({
+            allowGlass,
+            isDark,
+            colors,
+            platform: Platform.OS,
+          }),
+        }}
+      />
+      <Stack.Screen
+        name="Reservations"
+        component={ReservationsScreen}
+        options={{
+          title: reservationsLabel ?? '',
+          ...stackChromeOptions({
+            allowGlass,
+            isDark,
+            colors,
+            platform: Platform.OS,
+          }),
+        }}
+      />
+    </Stack.Navigator>
   );
 }
 
@@ -116,16 +138,31 @@ function BootstrappedApp({
   bootstrap: CmsBootstrap | null;
   children: ReactNode;
 }) {
+  const isOnline = useNetworkStatus();
+
   return (
     <CmsBootstrapProvider bootstrap={bootstrap}>
       <AppUpdateProvider update={bootstrap?.operationalControls?.appUpdate}>
         <AppUpdateGate>
-          <CmsAlertProvider>{children}</CmsAlertProvider>
+          <CmsAlertProvider>
+            <View style={styles.shell}>
+              {isOnline ? null : <OfflineBanner includeTopInset />}
+              <ConsumeTopSafeArea active={!isOnline}>
+                {children}
+              </ConsumeTopSafeArea>
+            </View>
+          </CmsAlertProvider>
         </AppUpdateGate>
       </AppUpdateProvider>
     </CmsBootstrapProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  shell: {
+    flex: 1,
+  },
+});
 
 function MainTabs({routes}: {routes: TabRoute[]}) {
   const {colors, minTouchTarget} = useTheme();

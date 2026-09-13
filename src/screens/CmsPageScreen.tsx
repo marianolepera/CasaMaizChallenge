@@ -7,7 +7,6 @@ import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
 import {HomeBootstrapFeatures} from '../components/molecules/BootstrapPromotions';
 import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
-import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Input} from '../components/atoms/Input';
 import {SearchIcon} from '../components/atoms/SearchIcon';
 import {Text} from '../components/atoms/Text';
@@ -17,6 +16,7 @@ import {applyHomeFeatureFlags} from '../cms/featureFlags';
 import {filterLayoutByQuery} from '../cms/menuFilter';
 import {useCmsPage} from '../hooks/useCmsPage';
 import {useGlassChrome} from '../hooks/useGlassChrome';
+import {useNetworkStatus} from '../hooks/useNetworkStatus';
 import {tabBarOverlayInset, useTheme} from '../theme';
 
 export const MENU_SEARCH_INPUT_TEST_ID = 'cms-menu-search';
@@ -41,8 +41,7 @@ export function CmsPageScreen({
   const overlayInset = allowGlass
     ? tabBarOverlayInset(insets.bottom, minTouchTarget)
     : 0;
-  const {page, error, loading, refreshing, source, reload, refresh} =
-    useCmsPage(slug);
+  const {page, error, loading, refreshing, reload, refresh} = useCmsPage(slug);
   const bootstrap = useBootstrap();
   const [query, setQuery] = useState('');
   const pageLayout = page
@@ -143,7 +142,6 @@ export function CmsPageScreen({
       toolbar={toolbar}
       pageSlug={slug}
       overlayInset={overlayInset}>
-      {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       {searchField}
       <ScrollView
         keyboardShouldPersistTaps="handled"
@@ -187,10 +185,18 @@ function ScreenFrame({
   children: ReactNode;
 }) {
   const {colors, spacing} = useTheme();
+  const isOnline = useNetworkStatus();
+  const edges = !isOnline
+    ? overlayInset > 0
+      ? (['left', 'right'] as const)
+      : (['bottom', 'left', 'right'] as const)
+    : overlayInset > 0
+      ? (['top', 'left', 'right'] as const)
+      : undefined;
 
   return (
     <SafeAreaView
-      edges={overlayInset > 0 ? ['top', 'left', 'right'] : undefined}
+      edges={edges}
       style={[styles.safe, {backgroundColor: colors.background}]}
       testID={testID}>
       {toolbar ? (

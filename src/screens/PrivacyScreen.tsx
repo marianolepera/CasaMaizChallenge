@@ -6,7 +6,6 @@ import {EmptyState} from '../components/molecules/EmptyState';
 import {ErrorState} from '../components/molecules/ErrorState';
 import {LoadingState} from '../components/molecules/LoadingState';
 import {CmsScreenBanners} from '../components/molecules/CmsScreenBanners';
-import {OfflineBanner} from '../components/molecules/OfflineBanner';
 import {Text} from '../components/atoms/Text';
 import {useCmsLegal} from '../hooks/useCmsLegal';
 import {useGlassChrome} from '../hooks/useGlassChrome';
@@ -18,7 +17,7 @@ export const LEGAL_BODY_TEST_ID = 'cms-legal-body';
 
 export function PrivacyScreen() {
   const {colors, spacing} = useTheme();
-  const {document, error, loading, refreshing, source, reload, refresh} =
+  const {document, error, loading, refreshing, reload, refresh} =
     useCmsLegal('privacy_policy');
 
   const refreshControl = (
@@ -63,7 +62,6 @@ export function PrivacyScreen() {
 
   return (
     <ScreenFrame>
-      {source === 'cache' ? <OfflineBanner onRetry={reload} /> : null}
       <ScrollView
         refreshControl={refreshControl}
         contentContainerStyle={{

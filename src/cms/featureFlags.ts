@@ -7,7 +7,6 @@ import {
 import {readArray, readObject, readString} from './fields';
 import type {CmsBlock} from './page';
 
-/** Keys the app knows how to render. Values and copy come from the CMS. */
 export const FEATURE_NEW_HOME = 'enable_new_home';
 export const FEATURE_STORE_LOCATOR_BANNER = 'show_store_locator_banner';
 

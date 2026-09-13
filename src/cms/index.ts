@@ -24,6 +24,11 @@ export {resolveCmsImage, resolveMediaUrl} from './media';
 export type {ResolvedCmsImage} from './media';
 export {collectPageImageUrls, prefetchPageImages} from './prefetchImages';
 export type {PrefetchImage} from './prefetchImages';
+export {
+  WARM_LEGAL_KEYS,
+  WARM_PAGE_SLUGS,
+  warmSecondaryContent,
+} from './warmCache';
 export {createCmsClient} from './contentClient';
 export type {CmsClient, CmsClientOptions, LegalKey, PageSlug} from './contentClient';
 export {CmsClientProvider, useCmsClient} from './CmsClientProvider';

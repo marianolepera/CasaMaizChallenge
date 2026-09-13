@@ -12,6 +12,7 @@ export {
   OFFLINE_BANNER_MESSAGE,
   OFFLINE_BANNER_TEST_ID,
 } from './OfflineBanner';
+export {ConsumeTopSafeArea} from './ConsumeTopSafeArea';
 export {OperationalNotice} from './OperationalNotice';
 export type {OperationalNoticeProps} from './OperationalNotice';
 export {

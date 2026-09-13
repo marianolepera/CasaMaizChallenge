@@ -28,12 +28,7 @@ export function shouldPersistAlertDismiss(alert: CmsAlert): boolean {
   return normalizeAlertFrequencyType(alert.frequency?.type) !== 'session';
 }
 
-/**
- * Whether a previously dismissed alert should stay hidden.
- * - once: forever after dismiss (persisted)
- * - session: for this process only (memory)
- * - always: until cooldownHours elapses; without cooldown, may show again
- */
+
 export function isAlertOnCooldown(
   alert: CmsAlert,
   dismissedAt: number | undefined,

@@ -6,6 +6,8 @@ import {networkError} from '../api/errors';
 import type {CmsClient} from '../cms/contentClient';
 import type {ContentEnvelope} from '../cms/envelope';
 import {CmsClientProvider} from '../cms/CmsClientProvider';
+import {OFFLINE_BANNER_TEST_ID} from '../components/molecules/OfflineBanner';
+import {NetworkStatusProvider} from '../hooks/useNetworkStatus';
 import {createContentRepository} from '../repository/contentRepository';
 import {ContentRepositoryProvider} from '../repository/ContentRepositoryProvider';
 import {createMemoryStore} from '../repository/memoryStorage';
@@ -59,19 +61,22 @@ function legalEnvelope(): ContentEnvelope {
 function renderPrivacy(
   client: CmsClient,
   headerHeight?: number,
+  isOnline = true,
 ) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
       <SafeAreaProvider initialMetrics={insets}>
-        <CmsClientProvider client={client}>
-          <ContentRepositoryProvider
-            repository={createContentRepository(createMemoryStore())}>
-            <HeaderHeightContext.Provider value={headerHeight}>
-              <PrivacyScreen />
-            </HeaderHeightContext.Provider>
-          </ContentRepositoryProvider>
-        </CmsClientProvider>
+        <NetworkStatusProvider isOnline={isOnline}>
+          <CmsClientProvider client={client}>
+            <ContentRepositoryProvider
+              repository={createContentRepository(createMemoryStore())}>
+              <HeaderHeightContext.Provider value={headerHeight}>
+                <PrivacyScreen />
+              </HeaderHeightContext.Provider>
+            </ContentRepositoryProvider>
+          </CmsClientProvider>
+        </NetworkStatusProvider>
       </SafeAreaProvider>,
     );
   });
@@ -141,5 +146,26 @@ describe('PrivacyScreen', () => {
     expect(tree.root.findByProps({testID: 'privacy-screen'}).props.style).toEqual(
       expect.arrayContaining([expect.objectContaining({paddingTop: 96})]),
     );
+  });
+
+  it('leaves the offline banner to the app shell, above the header', async () => {
+    const getLegal = jest
+      .fn()
+      .mockResolvedValue(legalEnvelope()) as CmsClient['getLegal'];
+    const online = renderPrivacy(mockClient({getLegal}), 96);
+    await flush();
+
+    expect(() =>
+      online.root.findByProps({testID: OFFLINE_BANNER_TEST_ID}),
+    ).toThrow();
+
+    const offline = renderPrivacy(mockClient({getLegal}), 96, false);
+    await flush();
+
+    const frame = offline.root.findByProps({testID: 'privacy-screen'});
+    expect(frame.findAllByProps({testID: OFFLINE_BANNER_TEST_ID})).toHaveLength(
+      0,
+    );
+    expect(frame.findByProps({testID: LEGAL_TITLE_TEST_ID})).toBeTruthy();
   });
 });

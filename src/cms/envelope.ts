@@ -24,10 +24,7 @@ const contentEnvelopeSchema = z.looseObject({
 
 export type ResolvedContext = z.infer<typeof resolvedContextSchema>;
 
-/**
- * Runtime envelope. Narrower than `OpenApiContentEnvelope` on
- * `contractVersion` (only `1.1`) and looser on optional/null fields.
- */
+
 export type ContentEnvelope<TData = Record<string, unknown>> = {
   contractVersion: SupportedContractVersion;
   data: TData;

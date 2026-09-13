@@ -154,7 +154,7 @@ flowchart LR
 | `src/repository` | Last successful envelope; refuse cache past `nextChangeAt` |
 | `src/navigation` | CMS paths → native stack/tabs; validate external URLs |
 | `src/blocks` | `blockType` → component; unknown types render a fallback |
-| `src/screens` | Presentation, loading / empty / retry / offline banners |
+| `src/screens` | Presentation, loading / empty / retry states |
 
 Home and Menu render `data.layout` through `src/blocks/registry.ts`. Adding a documented block is a registry entry plus a component; screens stay unchanged.
 
@@ -173,7 +173,7 @@ A generated type is never used as a runtime parser. The spec can be stricter tha
 
 ### Cache and `nextChangeAt`
 
-The repository persists the last successful live envelope (not `preview`, not already expired). If the network fails, still-valid cache is shown with an offline banner. Cache at or after `nextChangeAt` is treated as expired and is not shown as current content. If there has never been a successful load, the UI is a retry state, not a blank screen.
+The repository persists the last successful live envelope (not `preview`, not already expired). If the network fails, still-valid cache is shown, and the app shell (`RootNavigator`) renders one offline banner above the navigator so every screen — including the ones with a native header — shows the same bar in the same place. Cache at or after `nextChangeAt` is treated as expired and is not shown as current content. If there has never been a successful load, the UI is a retry state, not a blank screen.
 
 Requests take an `AbortSignal`. Unmount or a newer request aborts the previous `fetch` so a late response cannot overwrite UI.
 

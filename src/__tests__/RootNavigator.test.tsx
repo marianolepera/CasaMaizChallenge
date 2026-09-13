@@ -8,6 +8,11 @@ import {TEXT_BLOCK_HEADING_TEST_ID} from '../blocks/textBlock';
 import type {CmsClient} from '../cms/contentClient';
 import type {ContentEnvelope} from '../cms/envelope';
 import {CmsClientProvider} from '../cms/CmsClientProvider';
+import {
+  OFFLINE_BANNER_MESSAGE,
+  OFFLINE_BANNER_TEST_ID,
+} from '../components/molecules/OfflineBanner';
+import {NetworkStatusProvider} from '../hooks/useNetworkStatus';
 import {RootNavigator} from '../navigation/RootNavigator';
 import {navigationRef} from '../navigation/navigationRef';
 import {createContentRepository} from '../repository/contentRepository';
@@ -57,19 +62,21 @@ function bootstrapEnvelope(
   };
 }
 
-function renderRoot(client: CmsClient) {
+function renderRoot(client: CmsClient, isOnline = true) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
       <SafeAreaProvider initialMetrics={insets}>
-        <CmsClientProvider client={client}>
-          <ContentRepositoryProvider
-            repository={createContentRepository(createMemoryStore())}>
-            <NavigationContainer ref={navigationRef}>
-              <RootNavigator />
-            </NavigationContainer>
-          </ContentRepositoryProvider>
-        </CmsClientProvider>
+        <NetworkStatusProvider isOnline={isOnline}>
+          <CmsClientProvider client={client}>
+            <ContentRepositoryProvider
+              repository={createContentRepository(createMemoryStore())}>
+              <NavigationContainer ref={navigationRef}>
+                <RootNavigator />
+              </NavigationContainer>
+            </ContentRepositoryProvider>
+          </CmsClientProvider>
+        </NetworkStatusProvider>
       </SafeAreaProvider>,
     );
   });
@@ -123,6 +130,39 @@ describe('RootNavigator', () => {
     expect(() =>
       tree!.root.findByProps({testID: 'cms-operational-notice'}),
     ).toThrow();
+    expect(() =>
+      tree!.root.findByProps({testID: OFFLINE_BANNER_TEST_ID}),
+    ).toThrow();
+  });
+
+  it('shows a single offline banner outside the screens so headers move down', async () => {
+    tree = renderRoot(
+      mockClient({
+        getBootstrap: jest.fn().mockResolvedValue(
+          bootstrapEnvelope([
+            {label: 'Inicio', destination: {path: '/'}},
+            {label: 'Menú', destination: {path: '/menu'}},
+            {label: 'Reservar', destination: {path: '/reservas'}},
+          ]),
+        ) as CmsClient['getBootstrap'],
+      }),
+      false,
+    );
+
+    await flush();
+
+    const banners = tree.root.findAll(
+      node =>
+        typeof node.type === 'string' &&
+        node.props.testID === OFFLINE_BANNER_TEST_ID,
+    );
+    expect(banners).toHaveLength(1);
+    expect(banners[0].props.accessibilityLabel).toBe(OFFLINE_BANNER_MESSAGE);
+    expect(
+      tree.root
+        .findByProps({testID: 'home-screen'})
+        .findAllByProps({testID: OFFLINE_BANNER_TEST_ID}),
+    ).toHaveLength(0);
   });
 
   it('falls back to Home when bootstrap has no tab routes', async () => {

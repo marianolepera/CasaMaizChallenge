@@ -7,16 +7,14 @@ import {TEXT_BLOCK_HEADING_TEST_ID} from '../blocks/textBlock';
 import type {CmsClient} from '../cms/contentClient';
 import type {ContentEnvelope} from '../cms/envelope';
 import {CmsClientProvider} from '../cms/CmsClientProvider';
-import {
-  OFFLINE_BANNER_MESSAGE,
-  OFFLINE_BANNER_TEST_ID,
-} from '../components/molecules/OfflineBanner';
+import {OFFLINE_BANNER_TEST_ID} from '../components/molecules/OfflineBanner';
 import {DEFAULT_APP_VERSION, contentQueryFromRuntime} from '../config';
 import {contentCacheKey} from '../repository/cacheKey';
 import {createContentRepository} from '../repository/contentRepository';
 import {ContentRepositoryProvider} from '../repository/ContentRepositoryProvider';
 import type {ContentRepository} from '../repository/contentRepository';
 import {createMemoryStore} from '../repository/memoryStorage';
+import {NetworkStatusProvider} from '../hooks/useNetworkStatus';
 import {HomeScreen} from '../screens/HomeScreen';
 
 const insets = {
@@ -54,16 +52,22 @@ function pageEnvelope(
   };
 }
 
-function renderHome(client: CmsClient, repository: ContentRepository) {
+function renderHome(
+  client: CmsClient,
+  repository: ContentRepository,
+  isOnline = true,
+) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
       <SafeAreaProvider initialMetrics={insets}>
-        <CmsClientProvider client={client}>
-          <ContentRepositoryProvider repository={repository}>
-            <HomeScreen />
-          </ContentRepositoryProvider>
-        </CmsClientProvider>
+        <NetworkStatusProvider isOnline={isOnline}>
+          <CmsClientProvider client={client}>
+            <ContentRepositoryProvider repository={repository}>
+              <HomeScreen />
+            </ContentRepositoryProvider>
+          </CmsClientProvider>
+        </NetworkStatusProvider>
       </SafeAreaProvider>,
     );
   });
@@ -95,7 +99,7 @@ describe('cache and offline fallback', () => {
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
-  it('persists a successful page and shows it with a banner when the network fails', async () => {
+  it('persists a successful page and shows it when the network fails', async () => {
     const repository = createContentRepository(createMemoryStore());
     const firstTree = renderHome(
       mockClient({
@@ -125,29 +129,17 @@ describe('cache and offline fallback', () => {
       .mockResolvedValueOnce(
         pageEnvelope('De nuevo en línea'),
       ) as CmsClient['getPage'];
-    const tree = renderHome(mockClient({getPage}), repository);
+    const tree = renderHome(mockClient({getPage}), repository, false);
     await flush();
 
     expect(
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
     ).toBe('Hola CMS');
     expect(tree.root.findByProps({testID: 'cms-page-layout'})).toBeTruthy();
-    expect(
-      tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID}).props
-        .accessibilityLabel,
-    ).toBe(OFFLINE_BANNER_MESSAGE);
     expect(() => tree.root.findByProps({testID: 'cms-error-state'})).toThrow();
-
-    await ReactTestRenderer.act(async () => {
-      tree.root.findByProps({accessibilityLabel: 'Reintentar'}).props.onPress();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-
     expect(
-      tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
-    ).toBe('De nuevo en línea');
-    expect(() => tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID})).toThrow();
+      tree.root.findAllByProps({testID: OFFLINE_BANNER_TEST_ID}),
+    ).toHaveLength(0);
   });
 
   it('does not present expired cached content as current', async () => {

@@ -4,6 +4,7 @@ import type {CmsError} from '../api/errors';
 import {parseCmsBootstrap} from '../cms/bootstrap';
 import type {CmsBootstrap} from '../cms/bootstrap';
 import {useCmsClient} from '../cms/CmsClientProvider';
+import {warmSecondaryContent} from '../cms/warmCache';
 import {getRuntimeContentQuery} from '../config';
 import {useContentRepository} from '../repository/ContentRepositoryProvider';
 import type {CacheReadResult} from '../repository/contentRepository';
@@ -48,6 +49,10 @@ export function useCmsBootstrap(): CmsBootstrapQuery {
         } catch {
           // Persist is best-effort; never log the CMS payload.
         }
+
+        warmSecondaryContent(client, repository, context, controller.signal).catch(
+          () => undefined,
+        );
       } catch (reason) {
         if (isAbortError(reason) || controller.signal.aborted) {
           return;

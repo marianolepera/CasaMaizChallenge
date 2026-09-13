@@ -2,6 +2,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {StatusBar} from 'react-native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {CmsClientProvider} from './src/cms/CmsClientProvider';
+import {NetworkStatusProvider} from './src/hooks/useNetworkStatus';
 import {appLinking} from './src/navigation/linking';
 import {RootNavigator} from './src/navigation/RootNavigator';
 import {navigationRef} from './src/navigation/navigationRef';
@@ -11,13 +12,15 @@ import {ThemeProvider, useTheme} from './src/theme';
 function App() {
   return (
     <SafeAreaProvider>
-      <CmsClientProvider>
-        <ContentRepositoryProvider>
-          <ThemeProvider>
-            <ThemedNavigation />
-          </ThemeProvider>
-        </ContentRepositoryProvider>
-      </CmsClientProvider>
+      <NetworkStatusProvider>
+        <CmsClientProvider>
+          <ContentRepositoryProvider>
+            <ThemeProvider>
+              <ThemedNavigation />
+            </ThemeProvider>
+          </ContentRepositoryProvider>
+        </CmsClientProvider>
+      </NetworkStatusProvider>
     </SafeAreaProvider>
   );
 }

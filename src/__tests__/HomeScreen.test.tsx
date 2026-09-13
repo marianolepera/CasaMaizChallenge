@@ -12,6 +12,7 @@ import {createContentRepository} from '../repository/contentRepository';
 import {ContentRepositoryProvider} from '../repository/ContentRepositoryProvider';
 import type {ContentRepository} from '../repository/contentRepository';
 import {createMemoryStore} from '../repository/memoryStorage';
+import {NetworkStatusProvider} from '../hooks/useNetworkStatus';
 import {HomeScreen} from '../screens/HomeScreen';
 
 const insets = {
@@ -44,16 +45,19 @@ function pageEnvelope(heading: string): ContentEnvelope {
 function renderHome(
   client: CmsClient,
   repository: ContentRepository = createContentRepository(createMemoryStore()),
+  isOnline = true,
 ) {
   let tree: ReactTestRenderer.ReactTestRenderer;
   ReactTestRenderer.act(() => {
     tree = ReactTestRenderer.create(
       <SafeAreaProvider initialMetrics={insets}>
-        <CmsClientProvider client={client}>
-          <ContentRepositoryProvider repository={repository}>
-            <HomeScreen />
-          </ContentRepositoryProvider>
-        </CmsClientProvider>
+        <NetworkStatusProvider isOnline={isOnline}>
+          <CmsClientProvider client={client}>
+            <ContentRepositoryProvider repository={repository}>
+              <HomeScreen />
+            </ContentRepositoryProvider>
+          </CmsClientProvider>
+        </NetworkStatusProvider>
       </SafeAreaProvider>,
     );
   });
@@ -143,6 +147,37 @@ describe('HomeScreen', () => {
     expect(
       tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
     ).toBe('Sigue el menú');
+  });
+
+  it('keeps content on screen when connectivity drops, without its own banner', async () => {
+    const getPage = jest
+      .fn()
+      .mockResolvedValue(pageEnvelope('Hola CMS')) as CmsClient['getPage'];
+    const client = mockClient({getPage});
+    const repository = createContentRepository(createMemoryStore());
+    const tree = renderHome(client, repository, true);
+    await flush();
+
+    expect(() => tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID})).toThrow();
+
+    await ReactTestRenderer.act(() => {
+      tree.update(
+        <SafeAreaProvider initialMetrics={insets}>
+          <NetworkStatusProvider isOnline={false}>
+            <CmsClientProvider client={client}>
+              <ContentRepositoryProvider repository={repository}>
+                <HomeScreen />
+              </ContentRepositoryProvider>
+            </CmsClientProvider>
+          </NetworkStatusProvider>
+        </SafeAreaProvider>,
+      );
+    });
+
+    expect(
+      tree.root.findByProps({testID: TEXT_BLOCK_HEADING_TEST_ID}).props.children,
+    ).toBe('Hola CMS');
+    expect(() => tree.root.findByProps({testID: OFFLINE_BANNER_TEST_ID})).toThrow();
   });
 
   it('shows a retryable error and recovers when there is no cache', async () => {

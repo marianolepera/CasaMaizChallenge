@@ -11,3 +11,4 @@ export {
 export type {CmsErrorKind} from './errors';
 export {createHttpClient} from './httpClient';
 export type {HttpClient, HttpRequestOptions, QueryParams} from './httpClient';
+export {probeReachability} from './reachability';

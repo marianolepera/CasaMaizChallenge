@@ -6,7 +6,6 @@ import type {
 
 export type FormFieldValue = string | boolean;
 
-/** Same body as POST /api/form-submissions in the generated OpenAPI spec. */
 export type MobileFormSubmissionRequest = OpenApiFormSubmissionRequest;
 export type MobileFormSubmissionResponse = OpenApiFormSubmissionResponse;
 
