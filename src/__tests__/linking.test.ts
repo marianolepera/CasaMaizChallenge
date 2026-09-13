@@ -22,13 +22,26 @@ describe('app linking', () => {
     expect(appLinking.getStateFromPath?.('menu', linkingOptions)?.routes[0]).toMatchObject({
       name: 'Tabs',
     });
-    expect(
-      appLinking.getStateFromPath?.('legal/privacy_policy', linkingOptions)
-        ?.routes[0],
-    ).toMatchObject({name: 'Privacy'});
-    expect(
-      appLinking.getStateFromPath?.('reservas', linkingOptions)?.routes[0],
-    ).toMatchObject({name: 'Reservations'});
+
+    const privacyState = appLinking.getStateFromPath?.(
+      'legal/privacy_policy',
+      linkingOptions,
+    );
+    expect(privacyState?.routes.map(route => route.name)).toEqual([
+      'Tabs',
+      'Privacy',
+    ]);
+    expect(privacyState?.index).toBe(1);
+
+    const reservationsState = appLinking.getStateFromPath?.(
+      'reservas',
+      linkingOptions,
+    );
+    expect(reservationsState?.routes.map(route => route.name)).toEqual([
+      'Tabs',
+      'Reservations',
+    ]);
+    expect(reservationsState?.index).toBe(1);
   });
 
   it('ignores unknown paths safely', () => {
