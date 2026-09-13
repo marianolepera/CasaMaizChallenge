@@ -7,6 +7,30 @@ The CMS is treated as an external versioned API. This repository does not contai
 Default API: `https://payload-cms-poc-seven.vercel.app`  
 OpenAPI: https://payload-cms-poc-seven.vercel.app/api/openapi.json
 
+## Screenshots
+
+Contract **1.1** against the published CMS. Media lives under [`docs/screenshots/`](docs/screenshots/).
+
+### iOS
+
+| Home (alert) | Home (light) | Home (dark) |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/01-home-alert.png" width="220" alt="Home with closing notice alert" /> | <img src="docs/screenshots/ios/02-home-light.png" width="220" alt="Home light mode" /> | <img src="docs/screenshots/ios/03-home-dark.png" width="220" alt="Home dark mode" /> |
+
+| Menu | Menu search | Reservations |
+|:---:|:---:|:---:|
+| <img src="docs/screenshots/ios/04-menu.png" width="220" alt="Menu screen" /> | <img src="docs/screenshots/ios/05-menu-search.png" width="220" alt="Menu search filtered results" /> | <img src="docs/screenshots/ios/06-reservations.png" width="220" alt="Reservations placeholder" /> |
+
+[Watch the iOS walkthrough](docs/screenshots/ios/demo.mov)
+
+### Android
+
+| Home (dark) | Home (light) | Menu | Reservations |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/screenshots/android/01-home-dark.png" width="180" alt="Android Home dark mode" /> | <img src="docs/screenshots/android/04-home-light.png" width="180" alt="Android Home light mode" /> | <img src="docs/screenshots/android/03-menu.png" width="180" alt="Android Menu screen" /> | <img src="docs/screenshots/android/02-reservations.png" width="180" alt="Android Reservations placeholder" /> |
+
+[Watch the Android walkthrough](docs/screenshots/android/demo.mov)
+
 ## Prerequisites
 
 Follow the official [React Native environment setup](https://reactnative.dev/docs/set-up-your-environment) for your OS. This project is **React Native CLI 0.87**, not Expo.
@@ -221,6 +245,7 @@ With more time: crash/content telemetry, release-build profiling on device, and 
 
 ## Docs
 
+- Screenshots & demos: [docs/screenshots/ios](docs/screenshots/ios) · [docs/screenshots/android](docs/screenshots/android)
 - Architecture diagram: [docs/architecture.md](docs/architecture.md)
 - Accessibility: [docs/accessibility.md](docs/accessibility.md)
 - Performance: [docs/performance.md](docs/performance.md)
