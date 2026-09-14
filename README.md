@@ -247,6 +247,7 @@ With more time: crash/content telemetry, release-build profiling on device, and 
 
 - Screenshots & demos: [docs/screenshots/ios](docs/screenshots/ios) · [docs/screenshots/android](docs/screenshots/android)
 - Architecture diagram: [docs/architecture.md](docs/architecture.md)
+- Type-check, lint, and test: [docs/quality.md](docs/quality.md)
 - Accessibility: [docs/accessibility.md](docs/accessibility.md)
 - Performance: [docs/performance.md](docs/performance.md)
 - Visual regression: [e2e/maestro/README.md](e2e/maestro/README.md)
